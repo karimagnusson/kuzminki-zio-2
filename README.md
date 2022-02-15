@@ -20,11 +20,9 @@ libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.2"
 #### Example
 ```scala
 import zio._
-import zio.console._
-import zio.blocking._
 import kuzminki.api._
 
-object ExampleApp extends zio.App {
+object ExampleApp extends ZIOAppDefault {
 
   class Client extends Model("client") {
     val id = column[Int]("id")
@@ -58,16 +56,14 @@ object ExampleApp extends zio.App {
     
     _ <- ZIO.foreach(clients) {
       case (id, username, age) =>
-        putStrLn(s"$id $username $age")
+        Console.printLine(s"$id $username $age")
     }
   } yield ()
 
   val dbConfig = DDbConfig.forDb("company").getConfig
   val dbLayer = Kuzminki.layer(dbConfig)
 
-  override def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] = {
-    job.provideCustomLayer(dbLayer).exitCode
-  }
+  def run = job.provideCustom(kuzminkiLayer)
 }
 ```
 
