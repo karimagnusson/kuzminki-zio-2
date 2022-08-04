@@ -17,7 +17,6 @@
 package kuzminki.insert
 
 import zio._
-
 import kuzminki.api.{db, Kuzminki}
 import kuzminki.api.Model
 import kuzminki.shape.ParamShape

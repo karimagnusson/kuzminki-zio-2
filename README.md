@@ -9,7 +9,7 @@ See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 #### Sbt
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.2"
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.3"
 ```
 
 #### Example
@@ -58,7 +58,7 @@ object ExampleApp extends ZIOAppDefault {
   val dbConfig = DDbConfig.forDb("company").getConfig
   val dbLayer = Kuzminki.layer(dbConfig)
 
-  def run = job.provideCustom(kuzminkiLayer)
+  def run = job.provide(kuzminkiLayer)
 }
 ```
 

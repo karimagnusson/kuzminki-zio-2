@@ -14,7 +14,14 @@
 * limitations under the License.
 */
 
-package kuzminki.column
+package kuzminki.shape
+
+import kuzminki.column.TypeCol
 
 
-trait TypeOptCol[T] extends TypeCol[Option[T]] with AnyCol
+class RowShapeNamed(
+  val picked: Seq[Tuple2[String, TypeCol[_]]]
+) extends RowShape[Seq[Tuple2[String, Any]]] {
+  val cols = picked.map(_._2).toVector
+  val conv = new RowConvNamed(picked.map(t => (t._1, t._2.conv)).toVector) 
+}

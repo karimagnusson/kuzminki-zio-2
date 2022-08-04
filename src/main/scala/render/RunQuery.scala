@@ -27,11 +27,20 @@ trait RunQuery[R] {
   def run: RIO[Kuzminki, List[R]] =
     db.query(render)
 
+  def runAs[T](implicit transform: R => T): RIO[Kuzminki, List[T]] =
+    db.queryAs(render, transform)
+
   def runHead: RIO[Kuzminki, R] =
     db.queryHead(render)
 
+  def runHeadAs[T](implicit transform: R => T): RIO[Kuzminki, T] =
+    db.queryHeadAs(render, transform)
+
   def runHeadOpt: RIO[Kuzminki, Option[R]] =
     db.queryHeadOpt(render)
+
+  def runHeadOptAs[T](implicit transform: R => T): RIO[Kuzminki, Option[T]] =
+    db.queryHeadOptAs(render, transform)
 }
 
 

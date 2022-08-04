@@ -16,9 +16,6 @@
 
 package kuzminki.jdbc
 
-import zio._
-import zio.ZIO.attemptBlocking
-
 import java.util.Properties
 import java.sql.Connection
 import java.sql.DriverManager
@@ -28,12 +25,9 @@ import java.sql.ResultSet
 import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
-
-import scala.concurrent.duration._
-import scala.reflect.runtime.universe._
-import scala.util.{Try, Success, Failure}
-import scala.reflect.{classTag, ClassTag}
 import scala.collection.mutable.ListBuffer
+
+import zio._
 
 import kuzminki.api.{DbConfig, KuzminkiError}
 import kuzminki.shape.RowConv
@@ -106,7 +100,7 @@ class SingleConnection(conn: Connection) {
   }
 
   def query[R](stm: RenderedQuery[R]): RIO[Any, List[R]] = {
-    attemptBlocking {
+    ZIO.attemptBlocking {
       val jdbcStm = getStatement(stm.statement, stm.args)
       val jdbcResultSet = jdbcStm.executeQuery()
       var buff = ListBuffer.empty[R]
@@ -120,7 +114,7 @@ class SingleConnection(conn: Connection) {
   }
 
   def exec(stm: RenderedOperation): RIO[Any, Unit] = {
-    attemptBlocking {
+    ZIO.attemptBlocking {
       val jdbcStm = getStatement(stm.statement, stm.args)
       jdbcStm.execute()
       jdbcStm.close()
@@ -129,7 +123,7 @@ class SingleConnection(conn: Connection) {
   }
 
   def execNum(stm: RenderedOperation): RIO[Any, Int] = {
-    attemptBlocking {
+    ZIO.attemptBlocking {
       val jdbcStm = getStatement(stm.statement, stm.args)
       val num = jdbcStm.executeUpdate()
       jdbcStm.close()
@@ -138,11 +132,12 @@ class SingleConnection(conn: Connection) {
   }
 
   def close() = {
-    attemptBlocking {
+    ZIO.attemptBlocking {
       conn.close()
     }
   }
 }
+
 
 
 

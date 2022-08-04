@@ -19,26 +19,31 @@ package kuzminki.filter.types
 import kuzminki.column.AnyCol
 
 
-case class FilterMatches(col: AnyCol, arg: Any) extends SingleArgFilter {
+case class FilterSeqMatches(col: AnyCol, arg: Any) extends SingleArgFilter {
   val template = "%s = ?"
 }
 
-case class FilterNot(col: AnyCol, arg: Any) extends SingleArgFilter {
-  val template = "%s != ?"
+case class FilterSeqNot(col: AnyCol, arg: Any) extends SingleArgFilter {
+  val template = "NOT %s = ?"
 }
 
-case class FilterIn(col: AnyCol, arg: Any) extends SingleArgFilter {
-  val template = "%s = ANY(?)"
+case class FilterSeqHas(col: AnyCol, arg: Any) extends SingleArgFilter {
+  val template = "? = ANY(%s)"
 }
 
-case class FilterNotIn(col: AnyCol, arg: Seq[Any]) extends SingleArgFilter {
-  val template = "NOT %s = ANY(?)"
+case class FilterSeqHasNot(col: AnyCol, arg: Any) extends SingleArgFilter {
+  val template = "NOT ? = ANY(%s)"
 }
 
-case class FilterIsNull(col: AnyCol) extends NoArgFilter {
-  val template = "%s IS NULL"
+case class FilterSeqOverlap(col: AnyCol, arg: Any) extends SingleArgFilter {
+  val template = "%s && ?"
 }
 
-case class FilterIsNotNull(col: AnyCol) extends NoArgFilter {
-  val template = "%s IS NOT NULL"
+case class FilterSeqOverlapNot(col: AnyCol, arg: Any) extends SingleArgFilter {
+  val template = "NOT %s && ?"
 }
+
+
+
+
+

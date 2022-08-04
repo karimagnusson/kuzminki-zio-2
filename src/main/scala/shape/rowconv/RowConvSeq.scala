@@ -14,7 +14,20 @@
 * limitations under the License.
 */
 
-package kuzminki.conv
+package kuzminki.shape
+
+import java.sql.ResultSet
+import kuzminki.conv.ValConv
 
 
-trait ValOptConv[T] extends ValConv[Option[T]]
+class RowConvSeq(val cols: Vector[ValConv[_]]) extends RowConv[Seq[Any]] {
+
+  private val indexedCols = cols.zipWithIndex.map(p => (p._1, p._2 + 1))
+
+  def fromRow(rs: ResultSet) = {
+    indexedCols.toVector.map {
+      case (col, index) =>
+        col.get(rs, index)
+    }
+  }
+}

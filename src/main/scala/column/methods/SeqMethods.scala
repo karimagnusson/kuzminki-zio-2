@@ -14,11 +14,16 @@
 * limitations under the License.
 */
 
-package kuzminki.shape
+package kuzminki.column
 
-import kuzminki.column.TypeCol
+import kuzminki.filter.Filter
+import kuzminki.filter.types._
+import kuzminki.assign._
 
 
-class RowShapeVector(val cols: Vector[TypeCol[_]]) extends RowShape[Vector[Any]] {
-  val conv = new RowConvVector(cols.map(_.conv)) 
+trait SeqMethods[T] {
+  val real: ModelCol
+  def append(value: T) = Append(real, value)
+  def prepend(value: T) = Prepend(real, value)
+  def remove(value: T) = Remove(real, value)
 }

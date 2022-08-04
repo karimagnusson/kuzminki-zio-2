@@ -14,32 +14,24 @@
 * limitations under the License.
 */
 
-package kuzminki.delete
+package kuzminki.shape
 
-import zio._
-import kuzminki.api.{db, Kuzminki}
-import kuzminki.shape.ParamConv
-import kuzminki.render.{
-  RunOperationParams,
-  RenderedOperation
-}
+import java.sql.ResultSet
+import kuzminki.conv.ValConv
 
 
-class StoredDeleteCondition[P](
-    statement: String,
-    args: Vector[Any],
-    paramConv: ParamConv[P]
-  ) extends RunOperationParams[P] {
+class RowConvNamed(
+  val cols: Vector[Tuple2[String, ValConv[_]]]
+) extends RowConv[Seq[Tuple2[String, Any]]] {
 
-  def render(params: P) = {
-    RenderedOperation(
-      statement,
-      args ++ paramConv.fromShape(params)
-    )
+  private val indexedCols = cols.zipWithIndex.map {
+    case ((name, col), index) => (name, col, index + 1) 
   }
 
-  def debugSql(handler: String => Unit) = {
-    handler(statement)
-    this
+  def fromRow(rs: ResultSet) = {
+    indexedCols.toVector.map {
+      case (name, col, index) =>
+        (name, col.get(rs, index))
+    }
   }
 }

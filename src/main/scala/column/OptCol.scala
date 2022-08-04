@@ -14,16 +14,13 @@
 * limitations under the License.
 */
 
-package kuzminki.filter.types
+package kuzminki.column
 
-import kuzminki.filter.Filter
-import kuzminki.column.AnyCol
-import kuzminki.render.{Renderable, Prefix}
+import kuzminki.conv.{ValConv, ValOptConv}
+import kuzminki.render.UnderlyingRenderAndArgs
 
-
-trait ArrayFilter extends Filter {
-  val col: AnyCol
-  val argSeq: Seq[Any]
-  def render(prefix: Prefix) = template.format(col.render(prefix), Vector.fill(args.size)("?").mkString(", "))
-  val args = col.args ++ argSeq.toVector
+case class OptCol[T](underlying: TypeCol[T]) extends TypeCol[Option[T]]
+                                                with UnderlyingRenderAndArgs {
+  val conv = ValOptConv(underlying.conv)
 }
+

@@ -16,13 +16,13 @@
 
 package kuzminki.api
 
-import zio._
-
 import kuzminki.api._
 import kuzminki.render.{
   RenderedQuery,
   RenderedOperation
 }
+
+import zio._
 
 
 object db { 
@@ -34,7 +34,7 @@ object db {
     } yield rows
   }
 
-  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Has[Kuzminki] with Blocking, List[T]] = {
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Kuzminki, List[T]] = {
     for {
       db   <- Kuzminki.get
       rows <- db.queryAs(render, transform)
@@ -48,7 +48,7 @@ object db {
     } yield head
   }
 
-  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Has[Kuzminki] with Blocking, T] = {
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Kuzminki, T] = {
     for {
       db   <- Kuzminki.get
       rows <- db.queryHeadAs(render, transform)
@@ -62,7 +62,7 @@ object db {
     } yield headOpt
   }
 
-  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Has[Kuzminki] with Blocking, Option[T]] = {
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Kuzminki, Option[T]] = {
     for {
       db   <- Kuzminki.get
       rows <- db.queryHeadOptAs(render, transform)
