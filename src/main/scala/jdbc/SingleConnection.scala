@@ -54,6 +54,28 @@ object SingleConnection {
 
 class SingleConnection(conn: Connection) {
 
+  private val pgTypeName: Any => String = {
+    case v: String      => "text"
+    case v: Boolean     => "bool"
+    case v: Short       => "int2"
+    case v: Int         => "int4"
+    case v: Long        => "int8"
+    case v: Float       => "float4"
+    case v: Double      => "float8"
+    case v: BigDecimal  => "decimal"
+    case v: Time        => "time"
+    case v: Date        => "date"
+    case v: Timestamp   => "timestamp"
+    case v: Any         => throw KuzminkiError(s"type not supported [$v]")
+  }
+
+  private def arrayArg(arg: Seq[Any]) = {
+    conn.createArrayOf(
+      pgTypeName(arg.head),
+      arg.toArray.map(_.asInstanceOf[Object])
+    )
+  }
+
   private def setArg(jdbcStm: PreparedStatement, arg: Any, index: Int): Unit = {
     arg match {
       case value: String      => jdbcStm.setString(index, value)
@@ -67,7 +89,8 @@ class SingleConnection(conn: Connection) {
       case value: Time        => jdbcStm.setTime(index, value)
       case value: Date        => jdbcStm.setDate(index, value)
       case value: Timestamp   => jdbcStm.setTimestamp(index, value)
-      case _ => throw KuzminkiError(s"type not supported [$arg]")
+      case value: Seq[_]      => jdbcStm.setArray(index, arrayArg(value))
+      case _                  => throw KuzminkiError(s"type not supported [$arg]")
     }
   }
 
@@ -120,7 +143,6 @@ class SingleConnection(conn: Connection) {
     }
   }
 }
-
 
 
 

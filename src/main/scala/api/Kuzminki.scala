@@ -69,9 +69,15 @@ trait Kuzminki {
 
   def query[R](render: => RenderedQuery[R]): RIO[Any, List[R]]
 
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, List[T]]
+
   def queryHead[R](render: => RenderedQuery[R]): RIO[Any, R]
 
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, T]
+
   def queryHeadOpt[R](render: => RenderedQuery[R]): RIO[Any, Option[R]]
+
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, Option[T]]
 
   def exec(render: => RenderedOperation): RIO[Any, Unit]
 
@@ -95,6 +101,13 @@ private class DefaultApi(pool: Pool) extends Kuzminki {
     rows <- conn.query(stm).ensuring { pool.queue.offer(conn) }
   } yield rows
 
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, List[T]] = for {
+    stm  <- Task.attempt { render }
+    conn <- pool.queue.take
+    rows <- conn.query(stm).ensuring { pool.queue.offer(conn) }
+    res  <- Task.attempt { rows.map(transform) }
+  } yield res
+
   def queryHead[R](render: => RenderedQuery[R]): RIO[Any, R] = for {
     stm  <- Task.attempt { render }
     conn <- pool.queue.take
@@ -102,11 +115,25 @@ private class DefaultApi(pool: Pool) extends Kuzminki {
     head <- Task.attempt { rows.head }
   } yield head
 
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, T] = for {
+    stm  <- Task.attempt { render }
+    conn <- pool.queue.take
+    rows <- conn.query(stm).ensuring { pool.queue.offer(conn) }
+    head <- Task.attempt { transform(rows.head) }
+  } yield head
+
   def queryHeadOpt[R](render: => RenderedQuery[R]): RIO[Any, Option[R]] = for {
     stm     <- Task.attempt { render }
     conn    <- pool.queue.take
     rows    <- conn.query(stm).ensuring { pool.queue.offer(conn) }
     headOpt <- Task.attempt { rows.headOption }
+  } yield headOpt
+
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, Option[T]] = for {
+    stm     <- Task.attempt { render }
+    conn    <- pool.queue.take
+    rows    <- conn.query(stm).ensuring { pool.queue.offer(conn) }
+    headOpt <- Task.attempt { rows.headOption.map(transform) }
   } yield headOpt
 
   def exec(render: => RenderedOperation): RIO[Any, Unit] = for {
@@ -136,6 +163,13 @@ private class SplitApi(getPool: Pool, setPool: Pool) extends Kuzminki {
     rows <- conn.query(stm).ensuring { getPool.queue.offer(conn) }
   } yield rows
 
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, List[T]] = for {
+    stm  <- Task.attempt { render }
+    conn <- getPool.queue.take
+    rows <- conn.query(stm).ensuring { getPool.queue.offer(conn) }
+    res  <- Task.attempt { rows.map(transform) }
+  } yield res
+
   def queryHead[R](render: => RenderedQuery[R]): RIO[Any, R] = for {
     stm  <- Task.attempt { render }
     conn <- getPool.queue.take
@@ -143,11 +177,25 @@ private class SplitApi(getPool: Pool, setPool: Pool) extends Kuzminki {
     head <- Task.attempt { rows.head }
   } yield head
 
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, T] = for {
+    stm  <- Task.attempt { render }
+    conn <- getPool.queue.take
+    rows <- conn.query(stm).ensuring { getPool.queue.offer(conn) }
+    head <- Task.attempt { transform(rows.head) }
+  } yield head
+
   def queryHeadOpt[R](render: => RenderedQuery[R]): RIO[Any, Option[R]] = for {
     stm     <- Task.attempt { render }
     conn    <- getPool.queue.take
     rows    <- conn.query(stm).ensuring { getPool.queue.offer(conn) }
     headOpt <- Task.attempt { rows.headOption }
+  } yield headOpt
+
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Any, Option[T]] = for {
+    stm     <- Task.attempt { render }
+    conn    <- getPool.queue.take
+    rows    <- conn.query(stm).ensuring { getPool.queue.offer(conn) }
+    headOpt <- Task.attempt { rows.headOption.map(transform) }
   } yield headOpt
 
   def exec(render: => RenderedOperation): RIO[Any, Unit] = for {

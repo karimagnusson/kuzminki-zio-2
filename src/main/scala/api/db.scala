@@ -34,6 +34,13 @@ object db {
     } yield rows
   }
 
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Has[Kuzminki] with Blocking, List[T]] = {
+    for {
+      db   <- Kuzminki.get
+      rows <- db.queryAs(render, transform)
+    } yield rows
+  }
+
   def queryHead[R](render: => RenderedQuery[R]): RIO[Kuzminki, R] = {
     for {
       db   <- Kuzminki.get
@@ -41,11 +48,25 @@ object db {
     } yield head
   }
 
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Has[Kuzminki] with Blocking, T] = {
+    for {
+      db   <- Kuzminki.get
+      rows <- db.queryHeadAs(render, transform)
+    } yield rows
+  }
+
   def queryHeadOpt[R](render: => RenderedQuery[R]): RIO[Kuzminki, Option[R]] = {
     for {
       db      <- Kuzminki.get
       headOpt <- db.queryHeadOpt(render)
     } yield headOpt
+  }
+
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): RIO[Has[Kuzminki] with Blocking, Option[T]] = {
+    for {
+      db   <- Kuzminki.get
+      rows <- db.queryHeadOptAs(render, transform)
+    } yield rows
   }
 
   def exec(render: => RenderedOperation): RIO[Kuzminki, Unit] = {
