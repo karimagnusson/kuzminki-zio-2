@@ -1,7 +1,8 @@
 [![license](https://img.shields.io/github/license/rdbc-io/rdbc.svg?style=flat-square)](https://github.com/rdbc-io/rdbc/blob/master/LICENSE)
 # kuzminki-zio-2
 
-Kuzminki is query builder and access library for PostgreSQL and [ZIO](https://zio.dev/) written in Scala.
+Kuzminki is query builder and access library for PostgreSQL written in Scala.  
+This version is for ZIO 2.
 
 Kuzminki is written for those who like SQL. Queries are written with the same logic you write SQL statements. As a result the code is easy to read and memorise while the resulting SQL statement is predictable.
 
@@ -12,6 +13,7 @@ And For Akka
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 #### Sbt
+Compiled for ZIO 2.0.0
 ```sbt
 libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.3"
 ```
