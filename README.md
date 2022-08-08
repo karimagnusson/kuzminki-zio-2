@@ -6,16 +6,15 @@ This version is for ZIO 2.
 
 Kuzminki is written for those who like SQL. Queries are written with the same logic you write SQL statements. As a result the code is easy to read and memorise while the resulting SQL statement is predictable.
 
-This library is also available for ZIO 1 [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)
+This library is also available for ZIO 1 [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
 And For Akka [kuzminki-akka](https://github.com/karimagnusson/kuzminki-akka)
 And For Akka 
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 #### Sbt
-Compiled for ZIO 2.0.0
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.3"
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.3" // ZIO 2.0.0
 ```
 
 #### Example
