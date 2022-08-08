@@ -60,8 +60,7 @@ object ExampleApp extends ZIOAppDefault {
     }
   } yield ()
 
-  val dbConfig = DbConfig.forDb("company").getConfig
-  val dbLayer = Kuzminki.layer(dbConfig)
+  val dbLayer = Kuzminki.layer(DbConfig.forDb("company"))
 
   def run = job.provide(kuzminkiLayer)
 }
