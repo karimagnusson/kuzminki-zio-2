@@ -13,7 +13,7 @@ See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 #### Sbt
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.3" // ZIO 2.0.0
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC1" // ZIO 2.0.0
 ```
 
 #### Example

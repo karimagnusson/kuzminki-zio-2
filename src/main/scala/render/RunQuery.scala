@@ -51,15 +51,21 @@ trait RunQueryParams[P, R] {
   def run(params: P): RIO[Kuzminki, List[R]] =
     db.query(render(params))
 
+  def runAs[T](params: P)(implicit transform: R => T): RIO[Kuzminki, List[T]] =
+    db.queryAs(render(params), transform)
+
   def runHead(params: P): RIO[Kuzminki, R] =
     db.queryHead(render(params))
 
+  def runHeadAs[T](params: P)(implicit transform: R => T): RIO[Kuzminki, T] =
+    db.queryHeadAs(render(params), transform)
+
   def runHeadOpt(params: P): RIO[Kuzminki, Option[R]] =
     db.queryHeadOpt(render(params))
+
+  def runHeadOptAs[T](params: P)(implicit transform: R => T): RIO[Kuzminki, Option[T]] =
+    db.queryHeadOptAs(render(params), transform)
 }
-
-
-
 
 
 
