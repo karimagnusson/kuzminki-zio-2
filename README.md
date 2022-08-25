@@ -106,8 +106,8 @@ Do INSERT, UPDATE and DELETE in one transaction.
 ```scala
 sql.transaction(
   sql.insert(client).cols2(t => (t.username, t.age)).render(("Joe", 25)),
-  sql.update(client).set(_.age ==> 31).where(_.id === 45).render,
-  sql.delete(client).where(_.id === 83).render
+  sql.update(client).set(_.age ==> 31).where(_.id === 45),
+  sql.delete(client).where(_.id === 83)
 ).run
 ```
 
