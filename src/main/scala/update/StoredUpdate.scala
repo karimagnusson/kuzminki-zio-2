@@ -17,7 +17,8 @@
 package kuzminki.update
 
 import zio._
-import kuzminki.api.{db, Kuzminki}
+import zio.stream.ZSink
+import kuzminki.api.db
 import kuzminki.shape.ParamConv
 import kuzminki.render.RenderedOperation
 
@@ -28,20 +29,31 @@ class StoredUpdate[P1, P2](
     filters: ParamConv[P2]
   ) {
 
-  def render(changeArgs: P1, filterArgs: P2) = {
+  def render(args1: P1, args2: P2) = {
     RenderedOperation(
       statement,
-      changes.fromShape(changeArgs) ++ filters.fromShape(filterArgs)
+      changes.fromShape(args1) ++ filters.fromShape(args2)
     )
   }
 
   // run
 
-  def run(changeArgs: P1, filterArgs: P2): RIO[Kuzminki, Unit] =
-    db.exec(render(changeArgs, filterArgs))
+  def run(args1: P1, args2: P2) = db.exec(render(args1, args2))
 
-  def runNum(changeArgs: P1, filterArgs: P2): RIO[Kuzminki, Int] =
-    db.execNum(render(changeArgs, filterArgs))
+  def runNum(args1: P1, args2: P2) = db.execNum(render(args1, args2))
+
+  def runList(args: Seq[Tuple2[P1, P2]]) =
+    db.execList(args.map(arg => render(arg._1, arg._2)))
+
+  def asSink = ZSink.foreach { (arg: Tuple2[P1, P2]) =>
+    db.exec(render(arg._1, arg._2))
+  }
+
+  def collect(size: Int) = ZSink.collectAllN[Tuple2[P1, P2]](size)
+
+  def asChunkSink = ZSink.foreach { (chunk: Chunk[Tuple2[P1, P2]]) =>
+    db.execList(chunk.toList.map(arg => render(arg._1, arg._2)))
+  }
 
   // debug
 

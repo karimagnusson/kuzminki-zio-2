@@ -131,6 +131,26 @@ class SingleConnection(conn: Connection) {
     }
   }
 
+  def execList(stms: Seq[RenderedOperation]): RIO[Any, Unit] = {
+    ZIO.attemptBlocking {
+      try {
+        conn.setAutoCommit(false)
+        stms.foreach { stm => 
+          val jdbcStm = getStatement(stm.statement, stm.args)
+          jdbcStm.execute()
+        }
+        conn.commit()
+        conn.setAutoCommit(true)
+        ()
+      } catch {
+        case th: Throwable =>
+          conn.rollback()
+          conn.setAutoCommit(true)
+          throw th
+      }
+    }
+  }
+
   def close() = {
     ZIO.attemptBlocking {
       conn.close()

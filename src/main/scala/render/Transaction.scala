@@ -14,34 +14,12 @@
 * limitations under the License.
 */
 
-package kuzminki.delete
+package kuzminki.render
 
-import zio._
-import kuzminki.api.{db, Kuzminki}
-import kuzminki.shape.ParamConv
-import kuzminki.render.{
-  RunOperationParams,
-  RunOperationAsSink,
-  RenderedOperation
-}
+import kuzminki.api.db
+import kuzminki.render.RenderedOperation
 
 
-class StoredDeleteCondition[P](
-    statement: String,
-    args: Vector[Any],
-    paramConv: ParamConv[P]
-  ) extends RunOperationParams[P]
-       with RunOperationAsSink[P] {
-
-  def render(params: P) = {
-    RenderedOperation(
-      statement,
-      args ++ paramConv.fromShape(params)
-    )
-  }
-
-  def debugSql(handler: String => Unit) = {
-    handler(statement)
-    this
-  }
+class Transaction(stms: Seq[RenderedOperation]) {
+  def run = db.execList(stms)
 }

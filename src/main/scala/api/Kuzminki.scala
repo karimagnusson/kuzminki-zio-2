@@ -83,6 +83,8 @@ trait Kuzminki {
 
   def execNum(render: => RenderedOperation): RIO[Any, Int]
 
+  def execList(stms: Seq[RenderedOperation]): RIO[Any, Unit]
+
   def close: URIO[Any, Unit]
 }
 
@@ -148,6 +150,11 @@ private class DefaultApi(pool: Pool) extends Kuzminki {
     num  <- conn.execNum(stm).ensuring { pool.queue.offer(conn) }
   } yield num
 
+  def execList(stms: Seq[RenderedOperation]): RIO[Any, Unit] = for {
+    conn <- pool.queue.take
+    _    <- conn.execList(stms).ensuring { pool.queue.offer(conn) }
+  } yield ()
+
   def close: URIO[Any, Unit] = for {
     _ <- ZIO.foreach(pool.all)(_.close()).orDie
     _ <- pool.queue.shutdown
@@ -209,6 +216,11 @@ private class SplitApi(getPool: Pool, setPool: Pool) extends Kuzminki {
     conn <- setPool.queue.take
     num  <- conn.execNum(stm).ensuring { setPool.queue.offer(conn) }
   } yield num
+
+  def execList(stms: Seq[RenderedOperation]): RIO[Any, Unit] = for {
+    conn <- setPool.queue.take
+    _    <- conn.execList(stms).ensuring { setPool.queue.offer(conn) }
+  } yield ()
 
   def close: URIO[Any, Unit] = for {
     _ <- ZIO.foreach(getPool.all)(_.close()).orDie

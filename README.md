@@ -61,10 +61,62 @@ object ExampleApp extends ZIOAppDefault {
 
   val dbLayer = Kuzminki.layer(DbConfig.forDb("company"))
 
-  def run = job.provide(kuzminkiLayer)
+  def run = job.provide(dbLayer)
 }
 ```
 
+#### Streaming
+Streaming is available in the latest push, not in version 0.9.4-RC1.
+
+Streaming from the database.
+```scala
+sql
+  .select(client)
+  .cols3(_.all)
+  .all
+  .orderBy(_.id.asc)
+  .stream
+  .map(makeLine)
+  .run(fileSink(Paths.get("clints.txt")))
+```
+
+Streaming into the database. The same logic can be used for UPDATE and DELETE.
+```scala
+val insertStm = sql
+  .insert(client)
+  .cols2(t => (t.username, t.age))
+  .cache
+
+// insert one at a time.
+readFileIntoStream("clints.txt")
+  .map(makeTupleFromLine)
+  .run(insertStm.asSink)
+
+// insert in chunks of 100 using transaction.
+readFileIntoStream("clints.txt")
+  .map(makeTupleFromLine)
+  .aggregate(testStm.collect(100))
+  .run(insertStm.asChunkSink)
+```
+
+#### Transaction
+Transaction is available in the latest push, not in version 0.9.4-RC1.
+
+Do INSERT, UPDATE and DELETE in one transaction.
+```scala
+sql.transaction(
+  sql.insert(client).cols2(t => (t.username, t.age)).render(("Joe", 25)),
+  sql.update(client).set(_.age ==> 31).where(_.id === 45).render,
+  sql.delete(client).where(_.id === 83).render
+).run
+```
+
+Insert many rows in one transaction. The same logic can be used for UPDATE and DELETE.
+```scala
+val clientList: List[Tuple2[String, Int]] = //...
+
+insertStm.execList(clientList)
+```
 
 
 

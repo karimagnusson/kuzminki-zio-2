@@ -17,18 +17,18 @@
 package kuzminki.render
 
 import zio._
-import kuzminki.api.{db, Kuzminki}
+import zio.stream.ZSink
+import kuzminki.shape.ParamConv
+import kuzminki.api.db
 
 
 trait RunOperation {
 
   def render: RenderedOperation
 
-  def run: RIO[Kuzminki, Unit] =
-    db.exec(render)
+  def run = db.exec(render)
 
-  def runNum: RIO[Kuzminki, Int] =
-    db.execNum(render)
+  def runNum = db.execNum(render)
 }
 
 
@@ -36,15 +36,26 @@ trait RunOperationParams[P] {
 
   def render(params: P): RenderedOperation
 
-  def run(params: P): RIO[Kuzminki, Unit] =
-    db.exec(render(params))
+  def run(params: P) = db.exec(render(params))
 
-  def runNum(params: P): RIO[Kuzminki, Int] =
-    db.execNum(render(params))
+  def runNum(params: P) = db.execNum(render(params))
 }
 
 
+trait RunOperationAsSink[P] {
 
+  def render(params: P): RenderedOperation
+
+  def runList(paramList: Seq[P]) = db.execList(paramList.map(render(_)))
+
+  def asSink = ZSink.foreach((params: P) => db.exec(render(params)))
+
+  def collect(size: Int) = ZSink.collectAllN[P](size)
+
+  def asChunkSink = ZSink.foreach { (chunk: Chunk[P]) =>
+    db.execList(chunk.toList.map(p => render(p)))
+  }
+}
 
 
 
