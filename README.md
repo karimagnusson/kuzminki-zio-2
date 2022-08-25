@@ -95,7 +95,7 @@ readFileIntoStream("clints.txt")
 // insert in chunks of 100 using transaction.
 readFileIntoStream("clints.txt")
   .map(makeTupleFromLine)
-  .aggregate(testStm.collect(100))
+  .transduce(testStm.collect(100))
   .run(insertStm.asChunkSink)
 ```
 
