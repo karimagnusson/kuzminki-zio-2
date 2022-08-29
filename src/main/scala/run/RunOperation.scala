@@ -14,12 +14,13 @@
 * limitations under the License.
 */
 
-package kuzminki.render
+package kuzminki.run
 
 import zio._
 import zio.stream.ZSink
-import kuzminki.shape.ParamConv
 import kuzminki.api.db
+import kuzminki.shape.ParamConv
+import kuzminki.render.RenderedOperation
 
 
 trait RunOperation {
@@ -56,6 +57,8 @@ trait RunOperationAsSink[P] {
     db.execList(chunk.toList.map(p => render(p)))
   }
 }
+
+
 
 
 

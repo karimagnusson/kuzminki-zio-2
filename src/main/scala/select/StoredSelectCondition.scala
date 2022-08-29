@@ -16,9 +16,8 @@
 
 package kuzminki.select
 
-import zio._
-import kuzminki.api.{db, Kuzminki}
-import kuzminki.render.{RunQueryParams, RenderedQuery}
+import kuzminki.run.RunQueryParams
+import kuzminki.render.RenderedQuery
 import kuzminki.shape.ParamConv
 import kuzminki.shape.RowConv
 

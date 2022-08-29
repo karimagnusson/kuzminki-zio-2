@@ -118,6 +118,89 @@ val clientList: List[Tuple2[String, Int]] = //...
 insertStm.execList(clientList)
 ```
 
+#### Functions
+Functions is available in the latest push, not in version 0.9.4-RC1.
+
+Use postgres functions to modify results.
+```scala
+import kuzminki.api._
+import kuzminki.fn._
+
+class Profile extends Model("profile") {
+  val firstName = column[String]("first_name")
+  val lastName = column[String]("last_name")
+  val bigNum = column[BigDecimal]("big_num")
+}
+
+val profile = Model.get[Profile]
+
+sql
+  .select(profile)
+  .cols3(t => (
+    Fn.concatWs(" ", t.firstName, t.lastName),
+    Fn.initcap(t.lastName),
+    Cast.asString(t.bigNum)
+  ))
+  .all
+  .run
+```
+
+Use functions as methods on columns.
+```scala
+import kuzminki.column.TypeCol
+
+implicit class RoundBigDecimal(col: TypeCol[BigDecimal]) {
+  def round(size: Int) = Fn.round(col, size)
+  def roundStr(size: Int) = Fn.roundStr(col, size)
+}
+
+sql
+  .select(profile)
+  .cols2(t => (
+    bigNum.round(2),
+    bigNum.roundStr(2)
+  ))
+  .all
+  .run
+```
+
+Create your own function classes.
+```scala
+import kuzminki.fn.types._
+
+case class Length(col: TypeCol[String]) extends IntFn {
+  val template = "length(%s)"
+}
+
+case class Left(col: TypeCol[String], size: Int) extends StringArgsFn {
+  val template = "left(%s, ?)"
+  def fnArgs = Vector(size)
+}
+
+sql
+  .select(profile)
+  .cols2(t => (
+    Length(t.firstName),
+    Left(t.lastName, 4)
+  ))
+  .all
+  .run
+```
+
+Aggregation now takes this form.
+```scala
+sql
+  .select(profile)
+  .cols4(t => (
+    Agg.avg(t.bigNum),
+    Agg.sum(t.bigNum),
+    Agg.max(t.bigNum),
+    Agg.min(t.bigNum)
+  ))
+  .all
+  .runHead
+```
+
 
 
 

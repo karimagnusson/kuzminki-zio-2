@@ -16,13 +16,11 @@
 
 package kuzminki.delete
 
-import zio._
-import kuzminki.api.{db, Kuzminki}
 import kuzminki.shape.ParamConv
-import kuzminki.render.{
+import kuzminki.render.RenderedOperation
+import kuzminki.run.{
   RunOperationParams,
   RunOperationAsSink,
-  RenderedOperation
 }
 
 
