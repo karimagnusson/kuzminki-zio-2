@@ -17,27 +17,38 @@
 package kuzminki.insert
 
 import kuzminki.api.Model
+import kuzminki.column.TypeCol
 import kuzminki.run.RunOperation
-import kuzminki.render.{
-  RenderedOperation,
-  SectionCollector
-}
+import kuzminki.render.RenderedOperation
 
 
-class RenderInsertData[M <: Model, P](
-    model: M,
-    coll: SectionCollector
-  ) extends RunOperation {
+class Values[M <: Model](
+  builder: ValuesBuilder[M]
+) extends PickInsertReturning(builder)
+     with RunOperation {
 
   def render = {
-    RenderedOperation(
-      coll.render,
-      coll.args
-    )
+    val coll = builder.collector
+    RenderedOperation(coll.render, coll.args)
   }
 
-  def debugSql(handler: String => Unit) = {
-    handler(coll.render)
+  def whereNotExists(pick: M => Seq[TypeCol[_]]) = new RenderInsert(
+    builder.whereNotExists(pick(builder.model).toVector)
+  )
+
+  def onConflictDoNothing = new RenderInsert(
+    builder.onConflictDoNothing
+  )
+
+  def onConflictOnColumn(pick: M => TypeCol[_]) = new DoUpdate(
+    builder,
+    pick(builder.model)
+  )
+
+  // print
+
+  def printSql = {
+    println(render.statement)
     this
   }
 }

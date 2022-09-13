@@ -1,42 +1,46 @@
-package kuzminki.insert
+package kuzminki.delete
 
-import kuzminki.api.Model
 import kuzminki.column.TypeCol
-import kuzminki.section.insert.{InsertBlankValuesSec, ReturningSec}
 import kuzminki.render.SectionCollector
+import kuzminki.section.operation.ReturningSec
 import kuzminki.shape._
 
 
-abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
+abstract class PickStoredDeleteReturning[M, P](
+  model: M,
+  coll: SectionCollector,
+  paramConv: ParamConv[P]
+) { 
 
   private def next[R](rowShape: RowShape[R]) = {
-    new RenderInsertReturning(
-      builder.returning(rowShape.cols),
+    new RenderStoredDeleteReturning(
+      coll.add(ReturningSec(rowShape.cols)),
+      paramConv,
       rowShape.conv
     )
   }
 
   def returningType[R](pick: M => RowReader[R]) = {
     next(
-      pick(builder.model)
+      pick(model)
     )
   }
 
   def returningSeq(pick: M => Seq[TypeCol[_]]) = {
     next(
-      new RowShapeSeq(pick(builder.model))
+      new RowShapeSeq(pick(model))
     )
   }
 
   def returningNamed(pick: M => Seq[Tuple2[String, TypeCol[_]]]) = {
     next(
-      new RowShapeNamed(pick(builder.model))
+      new RowShapeNamed(pick(model))
     )
   }
 
   def returning1[R](pick: M => TypeCol[R]) = {
     next(
-      new RowShapeSingle(pick(builder.model))
+      new RowShapeSingle(pick(model))
     )
   }
   
@@ -44,7 +48,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple2[TypeCol[R1], TypeCol[R2]]
       ) = {
     next(
-      new RowShape2(pick(builder.model))
+      new RowShape2(pick(model))
     )
   }
 
@@ -52,7 +56,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple3[TypeCol[R1], TypeCol[R2], TypeCol[R3]]
       ) = {
     next(
-      new RowShape3(pick(builder.model))
+      new RowShape3(pick(model))
     )
   }
 
@@ -60,7 +64,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple4[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4]]
       ) = {
     next(
-      new RowShape4(pick(builder.model))
+      new RowShape4(pick(model))
     )
   }
 
@@ -68,7 +72,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple5[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5]]
       ) = {
     next(
-      new RowShape5(pick(builder.model))
+      new RowShape5(pick(model))
     )
   }
 
@@ -76,7 +80,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple6[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6]]
       ) = {
     next(
-      new RowShape6(pick(builder.model))
+      new RowShape6(pick(model))
     )
   }
 
@@ -84,7 +88,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple7[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7]]
       ) = {
     next(
-      new RowShape7(pick(builder.model))
+      new RowShape7(pick(model))
     )
   }
 
@@ -92,7 +96,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple8[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8]]
       ) = {
     next(
-      new RowShape8(pick(builder.model))
+      new RowShape8(pick(model))
     )
   }
 
@@ -100,7 +104,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple9[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9]]
       ) = {
     next(
-      new RowShape9(pick(builder.model))
+      new RowShape9(pick(model))
     )
   }
 
@@ -108,7 +112,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple10[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10]]
       ) = {
     next(
-      new RowShape10(pick(builder.model))
+      new RowShape10(pick(model))
     )
   }
 
@@ -116,7 +120,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple11[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11]]
       ) = {
     next(
-      new RowShape11(pick(builder.model))
+      new RowShape11(pick(model))
     )
   }
 
@@ -124,7 +128,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple12[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12]]
       ) = {
     next(
-      new RowShape12(pick(builder.model))
+      new RowShape12(pick(model))
     )
   }
 
@@ -132,7 +136,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple13[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13]]
       ) = {
     next(
-      new RowShape13(pick(builder.model))
+      new RowShape13(pick(model))
     )
   }
 
@@ -140,7 +144,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple14[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14]]
       ) = {
     next(
-      new RowShape14(pick(builder.model))
+      new RowShape14(pick(model))
     )
   }
 
@@ -148,7 +152,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple15[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15]]
       ) = {
     next(
-      new RowShape15(pick(builder.model))
+      new RowShape15(pick(model))
     )
   }
 
@@ -156,7 +160,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple16[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15], TypeCol[R16]]
       ) = {
     next(
-      new RowShape16(pick(builder.model))
+      new RowShape16(pick(model))
     )
   }
 
@@ -164,7 +168,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple17[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15], TypeCol[R16], TypeCol[R17]]
       ) = {
     next(
-      new RowShape17(pick(builder.model))
+      new RowShape17(pick(model))
     )
   }
 
@@ -172,7 +176,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple18[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15], TypeCol[R16], TypeCol[R17], TypeCol[R18]]
       ) = {
     next(
-      new RowShape18(pick(builder.model))
+      new RowShape18(pick(model))
     )
   }
 
@@ -180,7 +184,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple19[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15], TypeCol[R16], TypeCol[R17], TypeCol[R18], TypeCol[R19]]
       ) = {
     next(
-      new RowShape19(pick(builder.model))
+      new RowShape19(pick(model))
     )
   }
 
@@ -188,7 +192,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple20[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15], TypeCol[R16], TypeCol[R17], TypeCol[R18], TypeCol[R19], TypeCol[R20]]
       ) = {
     next(
-      new RowShape20(pick(builder.model))
+      new RowShape20(pick(model))
     )
   }
 
@@ -196,7 +200,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple21[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15], TypeCol[R16], TypeCol[R17], TypeCol[R18], TypeCol[R19], TypeCol[R20], TypeCol[R21]]
       ) = {
     next(
-      new RowShape21(pick(builder.model))
+      new RowShape21(pick(model))
     )
   }
 
@@ -204,7 +208,7 @@ abstract class PickInsertReturning[M <: Model](builder: ValuesBuilder[M]) {
         pick: M => Tuple22[TypeCol[R1], TypeCol[R2], TypeCol[R3], TypeCol[R4], TypeCol[R5], TypeCol[R6], TypeCol[R7], TypeCol[R8], TypeCol[R9], TypeCol[R10], TypeCol[R11], TypeCol[R12], TypeCol[R13], TypeCol[R14], TypeCol[R15], TypeCol[R16], TypeCol[R17], TypeCol[R18], TypeCol[R19], TypeCol[R20], TypeCol[R21], TypeCol[R22]]
       ) = {
     next(
-      new RowShape22(pick(builder.model))
+      new RowShape22(pick(model))
     )
   }
 }
