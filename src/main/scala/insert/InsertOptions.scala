@@ -17,51 +17,55 @@
 package kuzminki.insert
 
 import kuzminki.api.Model
-import kuzminki.shape.ParamShape
-import kuzminki.section.insert._
-import kuzminki.run.RunOperationParams
-import kuzminki.render.{
-  SectionCollector,
-  RenderedOperation
-}
+import kuzminki.column.TypeCol
+import kuzminki.select.SelectSubquery
 
 
 class InsertOptions[M <: Model, P](
-    protected val model: M,
-    protected val coll: SectionCollector,
-    protected val paramShape: ParamShape[P]
-  ) extends PickInsertReturning[M, P]
-       with WhereNotExists[M, P]
-       with OnConflict[M, P]
-       with InsertSubquery[P]
-       with RunOperationParams[P] {
+  builder: InsertBuilder[M, P]
+) extends PickInsertStoredReturning(builder) {
+
+  // no cache
+
+  def values(params: P) = new Values(
+    builder.toValuesBuilder(params)
+  )
+
+  def fromSelect(sub: SelectSubquery[P]) = new RenderInsert(
+    builder.fromSelect(sub)
+  )
+
+  // cache
 
   def cache = {
     new StoredInsert(
-      coll.add(
-        InsertBlankValuesSec(paramShape.cols)
-      ).render,
-      paramShape.conv
+      builder.collector.render,
+      builder.paramShape.conv
     )
   }
 
-  def render(params: P) = {
-    val sections = coll.add(
-      InsertValuesSec(
-        paramShape.conv.fromShape(params)
-      )
-    )
-    RenderedOperation(
-      sections.render,
-      sections.args
+  def whereNotExists(pick: M => Seq[TypeCol[_]]) = {
+    val uniqueCols = pick(builder.model).toVector
+    new RenderStoredInsert(
+      builder.whereNotExists(uniqueCols),
+      builder.whereNotExistsReuse(uniqueCols)
     )
   }
 
-  // run
+  // on conflict
 
-  def debugSql(handler: String => Unit) = {
-    handler(coll.render)
-    this
+  def onConflictDoNothing = {
+    new RenderStoredInsert(
+      builder.onConflictDoNothing,
+      builder.paramShape.conv
+    )
+  }
+
+  def onConflictOnColumn(pick: M => TypeCol[_]) = {
+    new DoUpdateStored(
+      builder,
+      pick(builder.model)
+    )
   }
 }
 

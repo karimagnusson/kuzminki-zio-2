@@ -16,78 +16,48 @@
 
 package kuzminki.insert
 
+import kuzminki.api.Model
 import kuzminki.column.TypeCol
-import kuzminki.api.KuzminkiError
-import kuzminki.shape.ParamShape
-import kuzminki.assign.SetUpsert
-import kuzminki.render.SectionCollector
-import kuzminki.section.insert._
 
 
-class DoUpdate[M, P](
-    model: M,
-    coll: SectionCollector,
-    paramShape: ParamShape[P],
-    conflictCol: TypeCol[_]
-  ) {
+class DoUpdate[M <: Model, P](
+  builder: ValuesBuilder[M],
+  conflictCol: TypeCol[_]
+) {
+
+  def doNothing = new RenderInsert(
+    builder.onConflictColDoNothing(conflictCol)
+  )
+
+  def doUpdate(pick: M => Seq[TypeCol[_]]) = new RenderInsert(
+    builder.onConflictColDoUpdate(
+      conflictCol,
+      pick(builder.model).toVector
+    )
+  )
+}
+
+
+class DoUpdateStored[M <: Model, P](
+  builder: InsertBuilder[M, P],
+  conflictCol: TypeCol[_]
+) {
 
   def doNothing = {
-    new RenderInsert(
-      coll.extend(Vector(
-        InsertBlankValuesSec(paramShape.cols),
-        InsertOnConflictSec,
-        InsertDoNothingSec
-      )),
-      paramShape.conv
+    new RenderStoredInsert(
+      builder.onConflictColDoNothing(conflictCol),
+      builder.paramShape.conv
     )
   }
 
   def doUpdate(pick: M => Seq[TypeCol[_]]) = {
-    doUpdateApply(
-      pick(model).toVector
-    )
-  }
-
-  protected def validate(
-        conflictCol: TypeCol[_],
-        updateTypeCols: Vector[TypeCol[_]]
-      ) = {
-
-    val updateCols = updateTypeCols.map {
-      case col: TypeCol[_] => col
-      case _ => throw KuzminkiError("no update columns selected")
-    }
-
-    if (updateCols.isEmpty) {
-      throw KuzminkiError("no update columns selected")
-    }
-
-    if (updateCols.contains(conflictCol)) {
-      throw KuzminkiError("cannot update the conflicting column")
-    }
-
-    updateCols
-  }
-
-  private def doUpdateApply(updateTypeCols: Vector[TypeCol[_]]) = {
-    val updateCols = validate(conflictCol, updateTypeCols)
-    new RenderInsert(
-      coll.extend(Vector(
-        InsertBlankValuesSec(paramShape.cols),
-        InsertOnConflictColumnSec(conflictCol),
-        InsertDoUpdateNoArgsSec(updateCols.map(SetUpsert(_)))
-      )),
-      new ParamConvReuse(
-        paramShape.conv,
-        Reuse.fromIndex(paramShape.cols, updateCols)
-      )
+    val updateCols = pick(builder.model).toVector
+    new RenderStoredInsert(
+      builder.onConflictColDoUpdate(conflictCol, updateCols),
+      builder.onConflictColDoUpdateReuse(updateCols)
     )
   }
 }
-
-
-
-
 
 
 

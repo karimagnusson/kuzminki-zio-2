@@ -7,13 +7,25 @@ This version is for ZIO 2.
 Kuzminki is written for those who like SQL. Queries are written with the same logic you write SQL statements. As a result the code is easy to read and memorise while the resulting SQL statement is predictable.
 
 This library is also available for ZIO 1 [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
-And For Akka [kuzminki-akka](https://github.com/karimagnusson/kuzminki-akka)
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
+You can take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-zhttp-demo) for a example of a REST API using this library and [zio-http](https://github.com/dream11/zio-http)
+
+Release 0.9.4-RC2 adds the following featurees:
+- Support for jsonb field
+- Support for uuid field
+- Streaming from and to the database
+- Support for transactions
+- Ability to use postgres functions
+- Improved ability to cache statements
+
+
+Attention! There are some changes to the API in this version. They affect INSERT, UPDATE and DELETE.
+
 #### Sbt
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC1" // ZIO 2.0.0
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC2" // ZIO 2.0.0
 ```
 
 #### Example
@@ -36,7 +48,8 @@ object ExampleApp extends ZIOAppDefault {
     _ <- sql
       .insert(client)
       .cols2(t => (t.username, t.age))
-      .run(("Joe", 35))
+      .values(("Joe", 35))
+      .run
     
     _ <- sql
       .update(client)
@@ -64,143 +77,4 @@ object ExampleApp extends ZIOAppDefault {
   def run = job.provide(dbLayer)
 }
 ```
-
-#### Streaming
-Streaming is available in the latest push, not in version 0.9.4-RC1.
-
-Streaming from the database.
-```scala
-sql
-  .select(client)
-  .cols3(_.all)
-  .all
-  .orderBy(_.id.asc)
-  .stream
-  .map(makeLine)
-  .run(fileSink(Paths.get("clints.txt")))
-```
-
-Streaming into the database. The same logic can be used for UPDATE and DELETE.
-```scala
-val insertStm = sql
-  .insert(client)
-  .cols2(t => (t.username, t.age))
-  .cache
-
-// insert one at a time.
-readFileIntoStream("clints.txt")
-  .map(makeTupleFromLine)
-  .run(insertStm.asSink)
-
-// insert in chunks of 100 using transaction.
-readFileIntoStream("clints.txt")
-  .map(makeTupleFromLine)
-  .transduce(testStm.collect(100))
-  .run(insertStm.asChunkSink)
-```
-
-#### Transaction
-Transaction is available in the latest push, not in version 0.9.4-RC1.
-
-Do INSERT, UPDATE and DELETE in one transaction.
-```scala
-sql.transaction(
-  sql.insert(client).cols2(t => (t.username, t.age)).render(("Joe", 25)),
-  sql.update(client).set(_.age ==> 31).where(_.id === 45),
-  sql.delete(client).where(_.id === 83)
-).run
-```
-
-Insert many rows in one transaction. The same logic can be used for UPDATE and DELETE.
-```scala
-val clientList: List[Tuple2[String, Int]] = //...
-
-insertStm.execList(clientList)
-```
-
-#### Functions
-Functions is available in the latest push, not in version 0.9.4-RC1.
-
-Use postgres functions to modify results.
-```scala
-import kuzminki.api._
-import kuzminki.fn._
-
-class Profile extends Model("profile") {
-  val firstName = column[String]("first_name")
-  val lastName = column[String]("last_name")
-  val bigNum = column[BigDecimal]("big_num")
-}
-
-val profile = Model.get[Profile]
-
-sql
-  .select(profile)
-  .cols3(t => (
-    Fn.concatWs(" ", t.firstName, t.lastName),
-    Fn.initcap(t.lastName),
-    Cast.asString(t.bigNum)
-  ))
-  .all
-  .run
-```
-
-Use functions as methods on columns.
-```scala
-import kuzminki.column.TypeCol
-
-implicit class RoundBigDecimal(col: TypeCol[BigDecimal]) {
-  def round(size: Int) = Fn.round(col, size)
-  def roundStr(size: Int) = Fn.roundStr(col, size)
-}
-
-sql
-  .select(profile)
-  .cols2(t => (
-    bigNum.round(2),
-    bigNum.roundStr(2)
-  ))
-  .all
-  .run
-```
-
-Create your own function classes.
-```scala
-import kuzminki.fn.types._
-
-case class Length(col: TypeCol[String]) extends IntFn {
-  val template = "length(%s)"
-}
-
-case class Left(col: TypeCol[String], size: Int) extends StringArgsFn {
-  val template = "left(%s, ?)"
-  def fnArgs = Vector(size)
-}
-
-sql
-  .select(profile)
-  .cols2(t => (
-    Length(t.firstName),
-    Left(t.lastName, 4)
-  ))
-  .all
-  .run
-```
-
-Aggregation now takes this form.
-```scala
-sql
-  .select(profile)
-  .cols4(t => (
-    Agg.avg(t.bigNum),
-    Agg.sum(t.bigNum),
-    Agg.max(t.bigNum),
-    Agg.min(t.bigNum)
-  ))
-  .all
-  .runHead
-```
-
-
-
 

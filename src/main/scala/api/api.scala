@@ -19,6 +19,7 @@ package kuzminki
 import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
+import java.util.UUID
 import scala.language.implicitConversions
 
 import kuzminki.column._
@@ -27,7 +28,7 @@ import kuzminki.sorting.Sorting
 import kuzminki.assign.Assign
 import kuzminki.update.RenderUpdate
 import kuzminki.delete.RenderDelete
-import kuzminki.insert.RenderInsertData
+import kuzminki.insert.{RenderInsert, Values}
 import kuzminki.run.RunStream
 import kuzminki.select.{
   RenderSelect,
@@ -58,6 +59,7 @@ package object api {
   implicit val kzimplDateCol: ColInfo => TypeCol[Date] = info => DateModelCol(info)
   implicit val kzimplTimestampCol: ColInfo => TypeCol[Timestamp] = info => TimestampModelCol(info)
   implicit val kzimplJsonbCol: ColInfo => TypeCol[Jsonb] = info => JsonbModelCol(info)
+  implicit val kzimplUUIDCol: ColInfo => TypeCol[UUID] = info => UUIDModelCol(info)
 
   implicit val kzimplStringSeqCol: ColInfo => TypeCol[Seq[String]] = info => StringSeqModelCol(info)
   implicit val kzimplBooleanSeqCol: ColInfo => TypeCol[Seq[Boolean]] = info => BooleanSeqModelCol(info)
@@ -85,6 +87,7 @@ package object api {
   implicit class DateImpl(val col: TypeCol[Date]) extends ComparativeMethods[Date]
   implicit class TimestampImpl(val col: TypeCol[Timestamp]) extends ComparativeMethods[Timestamp]
   implicit class JsonbImpl(val col: TypeCol[Jsonb]) extends JsonbMethods
+  implicit class UUIDImpl(val col: TypeCol[UUID]) extends TypeMethods[UUID]
 
   implicit class StringSeqImpl(val col: TypeCol[Seq[String]]) extends SeqMethods[String]
   implicit class BooleanSeqImpl(val col: TypeCol[Seq[Boolean]]) extends SeqMethods[Boolean]
@@ -105,7 +108,8 @@ package object api {
   implicit val kzimplRenderAggregation: RenderSelect[_, _] => AggregationSubquery = q => q.asAggregation
   implicit val kzimplRenderUpdate: RenderUpdate[_] => RenderedOperation = q => q.render
   implicit val kzimplRenderDelete: RenderDelete[_] => RenderedOperation = q => q.render
-  implicit val kzimplRenderInsert: RenderInsertData[_, _] => RenderedOperation = q => q.render
+  implicit val kzimplRenderInsert: RenderInsert => RenderedOperation = q => q.render
+  implicit val kzimplRenderValues: Values[_] => RenderedOperation = q => q.render
 
   // named cols
   
@@ -113,11 +117,11 @@ package object api {
 
   // pick one
 
+  implicit def kzimplTypeColToSeq[T](col: TypeCol[T]): Seq[TypeCol[_]] = Seq(col)
   implicit val kzimplFilterToSeq: Filter => Seq[Filter] = filter => Seq(filter)
   implicit val kzimplFilterOptToSeq: Option[Filter] => Seq[Option[Filter]] = filterOpt => Seq(filterOpt)
   implicit val kzimplSortingToSeq: Sorting => Seq[Sorting] = sorting => Seq(sorting)
   implicit val kzimplAssignToSeq: Assign => Seq[Assign] = assign => Seq(assign)
-  implicit def kzimplTypeColToSeq[T](col: TypeCol[T]): Seq[TypeCol[_]] = Seq(col)
 
   // streaming
 

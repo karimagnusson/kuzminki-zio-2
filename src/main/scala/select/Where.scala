@@ -19,7 +19,14 @@ package kuzminki.select
 import kuzminki.column.TypeCol
 import kuzminki.filter.Filter
 import kuzminki.section.Section
-import kuzminki.section.select.{WhereSec, WhereBlankSec, GroupBySec}
+import kuzminki.section.select.{
+  WhereSec,
+  WhereBlankSec,
+  SelectSec,
+  SelectDistinctSec,
+  SelectDistinctOnSec,
+  GroupBySec
+}
 
 
 class Where[M, R](
@@ -44,18 +51,6 @@ class Where[M, R](
     )
   }
 
-  @deprecated("use where whereOpt", "0.9.4-RC1")
-  def whereOpts(pick: M => Seq[Option[Filter]]) = {
-    toOrderBy(
-      pick(model).flatten.toVector match {
-        case Nil =>
-          WhereBlankSec
-        case filters =>
-          WhereSec(filters.toVector)
-      }
-    )
-  }
-
   def whereOpt(pick: M => Seq[Option[Filter]]) = {
     toOrderBy(
       pick(model).flatten match {
@@ -77,11 +72,44 @@ class Where[M, R](
       )
     )
   }
+
+  // distinct
+
+  def distinct = {
+    val sections = coll.sections.map {
+      case sec: SelectSec => SelectDistinctSec(sec.parts)
+      case sec => sec
+    }
+    new Where(
+      model,
+      SelectCollector(
+        coll.prefix,
+        coll.rowShape,
+        sections
+      )
+    )
+  }
+
+  def distinctOn(pick: M => Seq[TypeCol[_]]) = {
+    val picks = pick(model)
+    val sections = coll.sections.map {
+      case sec: SelectSec =>
+        SelectDistinctOnSec(
+          sec.parts.filter(p => picks.contains(p)),
+          sec.parts
+        )
+      case sec => sec
+    }
+    new Where(
+      model,
+      SelectCollector(
+        coll.prefix,
+        coll.rowShape,
+        sections
+      )
+    )
+  }
 }
-
-
-
-
 
 
 
