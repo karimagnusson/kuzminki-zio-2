@@ -12,7 +12,7 @@ See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 You can take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-zhttp-demo) for a example of a REST API using this library and [zio-http](https://github.com/dream11/zio-http)
 
-Release 0.9.4-RC2 adds the following features:
+Release 0.9.4-RC3 adds the following featurees:
 - Support for jsonb field
 - Support for uuid field
 - Streaming from and to the database
@@ -25,7 +25,7 @@ Attention! There are some changes to the API in this version. They affect INSERT
 
 #### Sbt
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC2" // ZIO 2.0.0
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC3" // ZIO 2.0.0
 ```
 
 #### Example
