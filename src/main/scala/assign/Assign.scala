@@ -16,10 +16,14 @@
 
 package kuzminki.assign
 
+import java.sql.Time
+import java.sql.Date
+import java.sql.Timestamp
 import kuzminki.column.{TypeCol, ModelCol}
 import kuzminki.render.{Renderable, Prefix, Wrap}
 import kuzminki.api.KuzminkiError
 import kuzminki.api.Jsonb
+import kuzminki.fn.general.Interval
 
 
 abstract class Assign(col: TypeCol[_], valueOpt: Option[Any]) extends Renderable with Wrap {
@@ -92,9 +96,31 @@ case class JsonbDelPath(col: TypeCol[Jsonb], value: Any) extends Assign(col, Som
   val template = s"$name = $name #- ?"
 }
 
+// timestamp / date / time
 
+case class TimestampNow(col: TypeCol[_]) extends Assign(col, None) {
+  val template = s"$name = now()"
+}
 
+case class TimeNow(col: TypeCol[Time]) extends Assign(col, None) {
+  val template = s"$name = timeofday()"
+}
 
+case class TimestampInc(col: TypeCol[Timestamp], interval: String) extends Assign(col, None) {
+  val template = s"$name = $name + interval '$interval'"
+}
+
+case class TimestampDec(col: TypeCol[Timestamp], interval: String) extends Assign(col, None) {
+  val template = s"$name = $name - interval '$interval'"
+}
+
+case class DateInc(col: TypeCol[Date], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = $name + ?"
+}
+
+case class DateDec(col: TypeCol[Date], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = $name - ?"
+}
 
 
 

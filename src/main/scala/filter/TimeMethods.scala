@@ -14,48 +14,32 @@
 * limitations under the License.
 */
 
-package kuzminki.fn.types
+package kuzminki.filter
 
+import java.sql.Time
 import kuzminki.column.TypeCol
-import kuzminki.render.{Prefix, NoArgs}
+import kuzminki.assign._
+import kuzminki.filter.types._
+import kuzminki.fn.types._
+import kuzminki.fn.Cast
 
 
-trait FnBase {
-  val col: TypeCol[_]
-  def template: String
+trait TimeMethods extends ComparativeMethods[Time] {
+
+  // filters
+
+  def hour = ExtractHourFn(col)
+  def minute = ExtractMinuteFn(col)
+  def second = ExtractSecondFn(col)
+  def milliseconds = ExtractMillisecondsFn(col)
+  def microseconds = ExtractMicrosecondsFn(col)
+
+  def asString = Cast.asString(col)
+
+  // update
+
+  def setNow = TimestampNow(col)
 }
-
-trait FnRender extends FnBase {
-  def render(prefix: Prefix) = template.format(col.render(prefix))
-}
-
-trait FnName extends FnBase {
-  def name = "%s_%s".format(
-    template.splitAt(template.indexOf('('))._1.toLowerCase,
-    col.name
-  )
-}
-
-trait FnArgs extends FnRender with FnName {
-  def fnArgs: Vector[Any]
-  val args = col.args ++ fnArgs
-}
-
-trait FnColArgs extends FnRender with FnName {
-  val args = col.args
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

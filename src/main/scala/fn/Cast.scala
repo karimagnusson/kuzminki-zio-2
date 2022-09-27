@@ -36,69 +36,46 @@ object Cast {
 package object castFn {
 
   trait CastFn extends FnRender {
+    val castAs: String
     val col: TypeCol[_]
     val args = col.args
+    def template = col match {
+      case c: JsonbFn => "(%s)::" + castAs
+      case _ => "%s::" + castAs
+    }
+    def name = "cast_%s".format(col.name)
   }
 
   case class CastString(col: TypeCol[_]) extends StringCol with CastFn {
-    val template = col match {
-      case c: JsonbFilterFn => "(%s)::text"
-      case _ => "%s::text"
-    }
-    def name = "string_%s".format(col.name)
+    val castAs = "text"
   }
 
   case class CastShort(col: TypeCol[_]) extends ShortCol with CastFn {
-    val template = col match {
-      case c: JsonbFilterFn => "(%s)::smallint"
-      case _ => "%s::smallint"
-    }
-    def name = "short_%s".format(col.name)
+    val castAs = "smallint"
   }
 
   case class CastInt(col: TypeCol[_]) extends IntCol with CastFn {
-    val template = col match {
-      case c: JsonbFilterFn => "(%s)::int"
-      case _ => "%s::int"
-    }
-    def name = "int_%s".format(col.name)
+    val castAs = "int"
   }
 
   case class CastLong(col: TypeCol[_]) extends LongCol with CastFn {
-    val template = col match {
-      case c: JsonbFilterFn => "(%s)::bigint"
-      case _ => "%s::bigint"
-    }
-    def name = "long_%s".format(col.name)
+    val castAs = "bigint"
   }
 
   case class CastFloat(col: TypeCol[_]) extends FloatCol with CastFn {
-    val template = col match {
-      case c: JsonbFilterFn => "(%s)::real"
-      case _ => "%s::real"
-    }
-    def name = "float_%s".format(col.name)
+    val castAs = "real"
   }
 
   case class CastDouble(col: TypeCol[_]) extends DoubleCol with CastFn {
-    val template = col match {
-      case c: JsonbFilterFn => "(%s)::float8"
-      case _ => "%s::float8"
-    }
-    def name = "double_%s".format(col.name)
+    val castAs = "float8"
   }
 
   case class CastBigDecimal(col: TypeCol[_]) extends BigDecimalCol with CastFn {
-    val template = col match {
-      case c: JsonbFilterFn => "(%s)::numeric"
-      case _ => "%s::numeric"
-    }
-    def name = "bigdecimal_%s".format(col.name)
+    val castAs = "numeric"
   }
 
   case class CastJsonb(col: TypeCol[_]) extends BigDecimalCol with CastFn {
-    val template = "%s::jsonb"
-    def name = "jsonb_%s".format(col.name)
+    val castAs = "jsonb"
   }
 }
 
