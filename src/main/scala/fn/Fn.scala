@@ -93,7 +93,7 @@ package object general {
   }
 
   case class ConcatWs(glue: String, cols: Vector[TypeCol[_]]) extends StringCol {
-    def template = s"concatws('$glue', %s)"
+    def template = s"concat_ws('$glue', %s)"
     def name = cols.map(_.name).mkString("_")
     def render(prefix: Prefix) = {
       template.format(
