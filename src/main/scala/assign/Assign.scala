@@ -23,7 +23,6 @@ import kuzminki.column.{TypeCol, ModelCol}
 import kuzminki.render.{Renderable, Prefix, Wrap}
 import kuzminki.api.KuzminkiError
 import kuzminki.api.Jsonb
-import kuzminki.fn.general.Interval
 
 
 abstract class Assign(col: TypeCol[_], valueOpt: Option[Any]) extends Renderable with Wrap {
@@ -106,21 +105,15 @@ case class TimeNow(col: TypeCol[Time]) extends Assign(col, None) {
   val template = s"$name = timeofday()"
 }
 
-case class TimestampInc(col: TypeCol[Timestamp], interval: String) extends Assign(col, None) {
-  val template = s"$name = $name + interval '$interval'"
-}
-
-case class TimestampDec(col: TypeCol[Timestamp], interval: String) extends Assign(col, None) {
-  val template = s"$name = $name - interval '$interval'"
-}
-
-case class DateInc(col: TypeCol[Date], value: Any) extends Assign(col, Some(value)) {
+case class DateTimeInc(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
   val template = s"$name = $name + ?"
 }
 
-case class DateDec(col: TypeCol[Date], value: Any) extends Assign(col, Some(value)) {
+case class DateTimeDec(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
   val template = s"$name = $name - ?"
 }
+
+
 
 
 

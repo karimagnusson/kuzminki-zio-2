@@ -27,6 +27,7 @@ import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
 import scala.collection.mutable.ListBuffer
+import org.postgresql.util.PGInterval
 
 import zio._
 
@@ -86,6 +87,7 @@ class SingleConnection(conn: Connection) {
       case value: Timestamp   => jdbcStm.setTimestamp(index, value)
       case value: Jsonb       => jdbcStm.setString(index, value.value)
       case value: UUID        => jdbcStm.setObject(index, value)
+      case value: PGInterval  => jdbcStm.setObject(index, value)
       case value: Seq[_]      => jdbcStm.setArray(index, arrayArg(value))
       case _                  => throw KuzminkiError(s"type not supported [$arg]")
     }

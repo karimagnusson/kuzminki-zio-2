@@ -21,6 +21,7 @@ import kuzminki.fn.types._
 import kuzminki.column.TypeCol
 import kuzminki.render.Prefix
 import kuzminki.api.KuzminkiError
+import org.postgresql.util.PGInterval
 
 // coalesce
 
@@ -63,33 +64,11 @@ object Fn {
   def interval(
     years: Int = 0,
     months: Int = 0,
-    weeks: Int = 0,
     days: Int = 0,
     hours: Int = 0,
     minutes: Int = 0,
-    seconds: Int = 0
-  ) = {
-    val parts = List(
-      "years" -> years,
-      "months" -> months,
-      "weeks" -> weeks,
-      "days" -> days,
-      "hours" -> hours,
-      "minutes" -> minutes,
-      "seconds" -> seconds
-    ) match {
-      case Nil =>
-        throw KuzminkiError("interval cannot be empty")
-      case parts => parts.map {
-        case (name, value) => value match {
-          case 0 => None
-          case _ => Some(s"$value $name")
-        }
-      }
-    }
-    
-    Interval(parts.flatten.mkString(" "))
-  }
+    seconds: Double = 0.0
+  ) = new PGInterval(years, months, days, hours, minutes, seconds)
 }
 
 
@@ -165,8 +144,6 @@ package object general {
   case class RoundAnyStr(col: TypeCol[_], size: Int) extends StringCol with RoundFn {
     def template = "round(%s::numeric, ?)::text"
   }
-
-  case class Interval(value: String)
 }
 
 

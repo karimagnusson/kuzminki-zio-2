@@ -21,13 +21,16 @@ import kuzminki.column.TypeCol
 import kuzminki.assign._
 import kuzminki.filter.types._
 import kuzminki.fn.types._
-import kuzminki.fn.general.Interval
 import kuzminki.fn.Cast
+import org.postgresql.util.PGInterval
 
 
 trait TimestampMethods extends ComparativeMethods[Timestamp] {
 
   // filters
+
+  def +(value: PGInterval) = DateTimeIncFn(col, value)
+  def -(value: PGInterval) = DateTimeDecFn(col, value)
 
   def age = TimestampAgeFn(col)
 
@@ -35,33 +38,33 @@ trait TimestampMethods extends ComparativeMethods[Timestamp] {
   def epochMillis = ExtractEpochMillisFn(col)
 
   def century = ExtractCenturyFn(col)
-  def day = ExtractDayFn(col)
   def decade = ExtractDecadeFn(col)
+  def year = ExtractYearFn(col)
+  def quarter = ExtractQuarterFn(col)
+  def month = ExtractMonthFn(col)
+  def week = ExtractWeekFn(col)
+  def day = ExtractDayFn(col)
   def dow = ExtractDowFn(col)
   def doy = ExtractDoyFn(col)
-  def hour = ExtractHourFn(col)
   def isoDow = ExtractIsoDowFn(col)
   def isoYear = ExtractIsoDowFn(col)
+  def hour = ExtractHourFn(col)
+  def minute = ExtractMinuteFn(col)
+  def second = ExtractSecondFn(col)
   def microseconds = ExtractMicrosecondsFn(col)
   def milliseconds = ExtractMillisecondsFn(col)
-  def minute = ExtractMinuteFn(col)
-  def month = ExtractMonthFn(col)
-  def quarter = ExtractQuarterFn(col)
-  def second = ExtractSecondFn(col)
-  def week = ExtractWeekFn(col)
-  def year = ExtractYearFn(col)
-
-  def asDate = TimestampCastDateFn(col)
-  def asTime = TimestampCastTimeFn(col)
+  
+  def asDate = Cast.asDate(col)
+  def asTime = Cast.asTime(col)
   def asString = Cast.asString(col)
 
-  def format(value: String) = TimestampStringFormatFn(col, value)
+  def format(value: String) = DateTimeFormatFn(col, value)
 
   // update
 
   def setNow = TimestampNow(col)
-  def +=(interval: Interval) = TimestampInc(col, interval.value)
-  def -=(interval: Interval) = TimestampDec(col, interval.value)
+  def +=(value: PGInterval) = DateTimeInc(col, value)
+  def -=(value: PGInterval) = DateTimeDec(col, value)
 }
 
 

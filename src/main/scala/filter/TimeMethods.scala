@@ -22,11 +22,15 @@ import kuzminki.assign._
 import kuzminki.filter.types._
 import kuzminki.fn.types._
 import kuzminki.fn.Cast
+import org.postgresql.util.PGInterval
 
 
 trait TimeMethods extends ComparativeMethods[Time] {
 
   // filters
+
+  def +(value: PGInterval) = DateTimeIncFn(col, value)
+  def -(value: PGInterval) = DateTimeDecFn(col, value)
 
   def hour = ExtractHourFn(col)
   def minute = ExtractMinuteFn(col)
@@ -36,9 +40,13 @@ trait TimeMethods extends ComparativeMethods[Time] {
 
   def asString = Cast.asString(col)
 
+  def format(value: String) = DateTimeFormatFn(col, value)
+
   // update
 
-  def setNow = TimestampNow(col)
+  def setNow = TimeNow(col)
+  def +=(value: PGInterval) = DateTimeInc(col, value)
+  def -=(value: PGInterval) = DateTimeDec(col, value)
 }
 
 

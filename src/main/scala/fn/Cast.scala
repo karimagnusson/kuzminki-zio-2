@@ -31,6 +31,9 @@ object Cast {
   def asDouble(col: TypeCol[_]) = CastDouble(col)
   def asBigDecimal(col: TypeCol[_]) = CastBigDecimal(col)
   def asJsonb(col: TypeCol[_]) = CastJsonb(col)
+  def asTimestamp(col: TypeCol[_]) = CastTimestamp(col)
+  def asDate(col: TypeCol[_]) = CastDate(col)
+  def asTime(col: TypeCol[_]) = CastTime(col)
 }
 
 package object castFn {
@@ -76,6 +79,18 @@ package object castFn {
 
   case class CastJsonb(col: TypeCol[_]) extends BigDecimalCol with CastFn {
     val castAs = "jsonb"
+  }
+
+  case class CastTimestamp(col: TypeCol[_]) extends TimestampCol with CastFn {
+    val castAs = "timestamp"
+  }
+
+  case class CastDate(col: TypeCol[_]) extends DateCol with CastFn {
+    val castAs = "date"
+  }
+
+  case class CastTime(col: TypeCol[_]) extends TimeCol with CastFn {
+    val castAs = "time"
   }
 }
 

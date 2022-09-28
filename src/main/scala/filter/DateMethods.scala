@@ -22,11 +22,15 @@ import kuzminki.assign._
 import kuzminki.filter.types._
 import kuzminki.fn.types._
 import kuzminki.fn.Cast
+import org.postgresql.util.PGInterval
 
 
 trait DateMethods extends ComparativeMethods[Date] {
 
   // filters
+
+  def +(value: PGInterval) = DateTimeIncFn(col, value)
+  def -(value: PGInterval) = DateTimeDecFn(col, value)
 
   def century = ExtractCenturyFn(col)
   def decade = ExtractDecadeFn(col)
@@ -40,14 +44,16 @@ trait DateMethods extends ComparativeMethods[Date] {
   def isoDow = ExtractIsoDowFn(col)
   def doy = ExtractDoyFn(col)
   
-  def asTimestamp = DateCastTimestampFn(col)
+  def asTimestamp = Cast.asTimestamp(col)
   def asString = Cast.asString(col)
+
+  def format(value: String) = DateTimeFormatFn(col, value)
 
   // update
 
   def setNow = TimestampNow(col)
-  def +=(value: Int) = DateInc(col, value)
-  def -=(value: Int) = DateDec(col, value)
+  def +=(value: PGInterval) = DateTimeInc(col, value)
+  def -=(value: PGInterval) = DateTimeDec(col, value)
 }
 
 
