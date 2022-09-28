@@ -110,7 +110,7 @@ sql
     t.eventDate.format("DD Mon YYYY"),
     t.updatedAt.format("DD Mon YYYY MM:HH")
   ))
-  .where(_.id === id)
+  .where(_.id === 25)
   .runHead
 
 sql
