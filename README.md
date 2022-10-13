@@ -136,14 +136,14 @@ sql
   .pickWhere1(_.id.use === Arg)
   .cache
     
-sql.delete(client).pickWhere(_.id.use === Arg).cache
+sql.delete(client).pickWhere1(_.id.use === Arg).cache
     
 sql
   .select(client)
   .cols3(_.all)
   .all
   .limit(5)
-  .pickWhere(_.age.use > Arg)
+  .pickWhere1(_.age.use > Arg)
   .cache
 
 ```
