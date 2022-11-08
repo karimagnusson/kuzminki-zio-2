@@ -10,7 +10,7 @@ This library is also available for ZIO 1 [kuzminki-zio](https://github.com/karim
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
-You can take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-zhttp-demo) for a example of a REST API using this library and [zio-http](https://github.com/dream11/zio-http)
+Take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-zhttp-demo) for an example of a REST API using this library and [zio-http](https://github.com/dream11/zio-http)
 
 Release 0.9.4-RC4 adds the following featurees:
 - Select row as JSON string
