@@ -22,7 +22,8 @@ Attention! There are some changes to the API in this version. They affect cached
 
 #### Sbt
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC4" // ZIO 2.0.0
+// compiled for Scala 2.13.8 and ZIO 2.0.0
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC4"
 ```
 
 #### Example
