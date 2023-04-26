@@ -28,14 +28,6 @@ See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 Take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-zhttp-demo) for an example of a REST API using this library and [zio-http](https://github.com/dream11/zio-http)
 
-Release 0.9.4-RC4 adds the following featurees:
-- Select row as JSON string
-- Debug, print query
-- Insert, update null values
-- Timestamp, Date, Time methods
-
-Attention! There are some changes to the API in this version. They affect cached queries.
-
 #### Sbt
 ```sbt
 // compiled for Scala 2.13.8 and ZIO 2.0.0
