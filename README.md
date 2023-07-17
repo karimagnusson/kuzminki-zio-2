@@ -83,9 +83,9 @@ object ExampleApp extends ZIOAppDefault {
 #### In the latest push
 
 Changes:
-Improved connection pool.
-Improved exceptions. Queries return typed exception SQLException.
-Improved custom functions.
+Improved connection pool.  
+Improved exceptions. Queries return typed exception SQLException.  
+Improved custom functions.  
 Added Pages.
 
 #### Custom functions
