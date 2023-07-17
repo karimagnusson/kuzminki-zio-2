@@ -90,6 +90,8 @@ Added Pages.
 
 #### Custom functions
 ```scala
+import kuzminki.fn.StringFn
+
 case class FullName(
   title: String,
   first: TypeCol[String],
