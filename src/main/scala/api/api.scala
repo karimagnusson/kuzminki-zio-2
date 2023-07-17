@@ -36,7 +36,7 @@ import kuzminki.render._
 
 package object api {
 
- // create model col
+  // create model col
 
   implicit val kzStringCol: ColInfo => TypeCol[String] = info => StringModelCol(info)
   implicit val kzBooleanCol: ColInfo => TypeCol[Boolean] = info => BooleanModelCol(info)

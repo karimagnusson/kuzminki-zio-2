@@ -38,7 +38,9 @@ import kuzminki.api.{
   DbConfig,
   KuzminkiError,
   Jsonb,
-  NoArg
+  NoArg,
+  InvalidArgException,
+  ResultTypeException
 }
 import kuzminki.render.{
   RenderedQuery,
@@ -91,7 +93,7 @@ class SingleConnection(conn: Connection) {
       case value: PGInterval    => jdbcStm.setObject(index, value)
       case value: TypeNull      => jdbcStm.setNull(index, value.typeId)
       case value: TypeArray     => jdbcStm.setArray(index, arrayArg(value))
-      case _ => throw KuzminkiError(s"type not supported [$arg]")
+      case _ => throw InvalidArgException(s"type not supported [$arg]")
     }
   }
 
@@ -108,56 +110,58 @@ class SingleConnection(conn: Connection) {
     jdbcStm
   }
 
-  def query[R](stm: RenderedQuery[R]): RIO[Any, List[R]] = {
+  def query[R](stm: RenderedQuery[R]): IO[SQLException, List[R]] = {
     ZIO.attemptBlocking {
       val jdbcStm = getStatement(stm.statement, stm.args)
       val jdbcResultSet = jdbcStm.executeQuery()
       var buff = ListBuffer.empty[R]
       while (jdbcResultSet.next()) {
-        buff += stm.rowConv.fromRow(jdbcResultSet)
+        try {
+          buff += stm.rowConv.fromRow(jdbcResultSet)
+        } catch {
+          case ex: Throwable =>
+            throw ResultTypeException("Your mode may not match the table", ex)
+        }
       }
       jdbcResultSet.close()
       jdbcStm.close()
       buff.toList
-    }
+    }.refineToOrDie[SQLException]
   }
 
-  def exec(stm: RenderedOperation): RIO[Any, Unit] = {
+  def exec(stm: RenderedOperation): IO[SQLException, Unit] = {
     ZIO.attemptBlocking {
       val jdbcStm = getStatement(stm.statement, stm.args)
       jdbcStm.execute()
       jdbcStm.close()
-      ()
-    }
+    }.unit.refineToOrDie[SQLException]
   }
 
-  def execNum(stm: RenderedOperation): RIO[Any, Int] = {
+  def execNum(stm: RenderedOperation): IO[SQLException, Int] = {
     ZIO.attemptBlocking {
       val jdbcStm = getStatement(stm.statement, stm.args)
       val num = jdbcStm.executeUpdate()
       jdbcStm.close()
       num
-    }
+    }.refineToOrDie[SQLException]
   }
 
-  def execList(stms: Seq[RenderedOperation]): RIO[Any, Unit] = {
+  def execList(stms: Seq[RenderedOperation]): IO[SQLException, Unit] = {
     ZIO.attemptBlocking {
-      try {
-        conn.setAutoCommit(false)
-        stms.foreach { stm => 
-          val jdbcStm = getStatement(stm.statement, stm.args)
-          jdbcStm.execute()
-        }
-        conn.commit()
-        conn.setAutoCommit(true)
-        ()
-      } catch {
-        case th: Throwable =>
-          conn.rollback()
-          conn.setAutoCommit(true)
-          throw th
+      conn.setAutoCommit(false)
+      stms.foreach { stm => 
+        val jdbcStm = getStatement(stm.statement, stm.args)
+        jdbcStm.execute()
       }
+      conn.commit()
+      conn.setAutoCommit(true)
     }
+    .tapError(e => ZIO.succeed {
+      conn.rollback()
+      conn.setAutoCommit(true)
+    })
+    .unit
+    .refineToOrDie[SQLException]
   }
 
   def close() = {
