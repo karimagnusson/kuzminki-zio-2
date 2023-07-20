@@ -30,7 +30,7 @@ Take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-z
 
 #### Sbt
 ```sbt
-// compiled for Scala 2.13.8 and ZIO 2.0.0
+// compiled for Scala 2.13.8 and ZIO 2.0.14
 libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC5"
 ```
 
