@@ -80,7 +80,7 @@ object ExampleApp extends ZIOAppDefault {
 }
 ```
 
-#### In the latest push
+#### In the latest version, 0.9.4-RC5
 
 Changes:
 Improved connection pool.  
