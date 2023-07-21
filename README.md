@@ -79,7 +79,7 @@ Take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-z
 
 #### In the latest version, 0.9.4-RC5
 
-Changes:
+Changes:  
 Improved exceptions. Queries return typed exception SQLException.  
 Improved custom functions.  
 Added Pages.
