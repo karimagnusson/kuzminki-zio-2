@@ -146,6 +146,7 @@ private class SplitApi(getPool: Pool, setPool: Pool) extends Kuzminki {
   private def router(stm: String) = stm.split(" ").head match {
     case "SELECT" => getPool
     case _ => setPool
+    
   }
 
   def query[R](render: => RenderedQuery[R]) = for {
