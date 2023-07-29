@@ -78,7 +78,7 @@ See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 Take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-zhttp-demo) for an example of a REST API using this library and [zio-http](https://github.com/dream11/zio-http)
 
 #### In the latest push
-Improved connection pool
+Improved connection pool  
 GROUP BY and HAVING
 
 ```scala
