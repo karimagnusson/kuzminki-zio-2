@@ -164,11 +164,13 @@ class SingleConnection(conn: Connection) {
     .refineToOrDie[SQLException]
   }
 
-  def close() = {
-    ZIO.attemptBlocking {
-      conn.close()
-    }
-  }
+  def isValid: IO[SQLException, Boolean] = (for {
+    closed    <- ZIO.attempt(conn.isClosed)
+    statement <- ZIO.attempt(conn.prepareStatement("SELECT 1"))
+    isAlive   <- ZIO.succeed(!closed && statement != null)
+  } yield isAlive).refineToOrDie[SQLException]
+
+  def close: UIO[Unit] = ZIO.attemptBlocking(conn.close()).orDie
 }
 
 

@@ -25,41 +25,40 @@ import kuzminki.render.{
 }
 
 import zio._
+import zio.Console.printLine
 
 
 object Kuzminki {
 
   Class.forName("org.postgresql.Driver")
 
-  private def createPool(conf: DbConfig): RIO[Any, Pool] = for {
-    connections <- ZIO.foreach(1 to conf.poolSize) { _ =>
-                     ZIO.attemptBlocking {
-                       SingleConnection.create(conf.url, conf.props)
-                     }
-                   }
-    queue       <- Queue.bounded[SingleConnection](conf.poolSize)
-    _           <- queue.offerAll(connections)
-  } yield new Pool(queue, connections.toList)
+  private def makeConn(conf: DbConfig): RIO[Any, SingleConnection] = ZIO.attemptBlocking {
+    SingleConnection.create(conf.url, conf.props)
+  }
 
-  def forConfig(conf: DbConfig) = create(conf)
+  private def create(conf: DbConfig): ZIO[Scope, Nothing, ZPool[Throwable, SingleConnection]] = {
+    val getConn = ZIO.acquireRelease(makeConn(conf).retry(Schedule.exponential(1.second)))(_.close)
+    ZPool.make(getConn, Range(conf.minPoolSize, conf.poolSize), 300.seconds)
+  }
 
-  def create(conf: DbConfig): RIO[Any, Kuzminki] = for {
-    pool <- createPool(conf)
-  } yield new DefaultApi(pool)
+  @deprecated("this method will be removed", "0.9.5")
+  def forConfig(conf: DbConfig) = throw KuzminkiError("This method is deprecated")
 
   def layer(conf: DbConfig): ZLayer[Any, Throwable, Kuzminki] = {
-    ZLayer.scoped(ZIO.acquireRelease(create(conf))(_.close))
+    ZLayer.scoped {
+      for {
+        pool <- create(conf)
+      } yield new DefaultApi(new Pool(pool))
+    }
   }
   
-  def createSplit(getConf: DbConfig,
-                  setConf: DbConfig): RIO[Any, Kuzminki] = for {
-    getPool <- createPool(getConf)
-    setPool <- createPool(setConf)
-  } yield new SplitApi(getPool, setPool)
-
-  def layerSplit(getConf: DbConfig,
-                 setConf: DbConfig): ZLayer[Any, Throwable, Kuzminki] = {
-    ZLayer.scoped(ZIO.acquireRelease(createSplit(getConf, setConf))(_.close))
+  def layerSplit(getConf: DbConfig, setConf: DbConfig): ZLayer[Any, Throwable, Kuzminki] = {
+    ZLayer.scoped {
+      for {
+        getPool <- create(setConf)
+        setPool <- create(setConf)
+      } yield new SplitApi(new Pool(getPool), new Pool(setPool))
+    }
   }
   
   def get = ZIO.service[Kuzminki]
@@ -86,18 +85,23 @@ trait Kuzminki {
 
   def execList(stms: Seq[RenderedOperation]): Task[Unit]
 
-  def close: URIO[Any, Unit]
+  @deprecated("this method will be removed", "0.9.5")
+  def close = ZIO.fail(KuzminkiError("This method is deprecated"))
 }
 
 
-private class Pool(queue: Queue[SingleConnection], all: List[SingleConnection]) {
-  
-  def get = ZIO.scoped(ZIO.acquireRelease(queue.take)(queue.offer(_)))
+private class Pool(pool: ZPool[Throwable, SingleConnection]) {
 
-  def close = for {
-    _ <- ZIO.foreach(all)(_.close()).orDie
-    _ <- queue.shutdown
-  } yield ()
+  def use[R](fn: SingleConnection => IO[SQLException, R]) = ZIO.scoped {
+    pool.get.flatMap { conn =>
+      fn(conn).tapError { _ =>
+        for {
+          isValid <- conn.isValid
+          _       <- ZIO.unless(isValid)(pool.invalidate(conn))
+        } yield ()
+      }
+    }
+  }
 }
 
 
@@ -105,7 +109,7 @@ private class DefaultApi(pool: Pool) extends Kuzminki {
 
   def query[R](render: => RenderedQuery[R]) = for {
     stm     <- ZIO.attempt(render)
-    rows    <- pool.get.flatMap(_.query(stm))
+    rows    <- pool.use(_.query(stm))
   } yield rows
 
   def queryAs[R, T](render: => RenderedQuery[R], transform: R => T) =
@@ -125,19 +129,17 @@ private class DefaultApi(pool: Pool) extends Kuzminki {
 
   def exec(render: => RenderedOperation) = for {
     stm     <- ZIO.attempt(render)
-    _       <- pool.get.flatMap(_.exec(stm))
+    _       <- pool.use(_.exec(stm))
   } yield ()
 
   def execNum(render: => RenderedOperation) = for {
     stm     <- ZIO.attempt(render)
-    num     <- pool.get.flatMap(_.execNum(stm))
+    num     <- pool.use(_.execNum(stm))
   } yield num
 
   def execList(stms: Seq[RenderedOperation]) = for {
-    _       <- pool.get.flatMap(_.execList(stms))
+    _       <- pool.use(_.execList(stms))
   } yield ()
-
-  def close = pool.close
 }
 
 
@@ -151,7 +153,7 @@ private class SplitApi(getPool: Pool, setPool: Pool) extends Kuzminki {
 
   def query[R](render: => RenderedQuery[R]) = for {
     stm     <- ZIO.attempt(render)
-    rows    <- router(stm.statement).get.flatMap(_.query(stm))
+    rows    <- router(stm.statement).use(_.query(stm))
   } yield rows
 
   def queryAs[R, T](render: => RenderedQuery[R], transform: R => T) =
@@ -171,21 +173,16 @@ private class SplitApi(getPool: Pool, setPool: Pool) extends Kuzminki {
 
   def exec(render: => RenderedOperation) = for {
     stm     <- ZIO.attempt(render)
-    _       <- setPool.get.flatMap(_.exec(stm))
+    _       <- setPool.use(_.exec(stm))
   } yield ()
 
   def execNum(render: => RenderedOperation) = for {
     stm     <- ZIO.attempt(render)
-    num     <- setPool.get.flatMap(_.execNum(stm))
+    num     <- setPool.use(_.execNum(stm))
   } yield num
 
   def execList(stms: Seq[RenderedOperation]) = for {
-    _       <- setPool.get.flatMap(_.execList(stms))
-  } yield ()
-
-  def close = for {
-    _ <- getPool.close
-    _ <- setPool.close
+    _       <- setPool.use(_.execList(stms))
   } yield ()
 }
 
