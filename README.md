@@ -7,7 +7,7 @@
 #### Sbt
 ```sbt
 // compiled for Scala 2.13.8 and ZIO 2.0.14
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC5"
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-zio-2" % "0.9.4-RC6"
 ```
 
 #### Example
