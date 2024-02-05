@@ -28,7 +28,7 @@ class DbConfig(db: String) {
   val props = new Properties()
 
   var poolSize = 10
-  var minPoolSize = 3
+  var minPoolSize = 4
 
   private var host = "localhost"
 

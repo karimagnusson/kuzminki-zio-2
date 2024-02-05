@@ -117,7 +117,7 @@ private class DefaultApi(pool: Pool) extends Kuzminki {
   def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T) =
     queryHead(render).map(transform)
 
-  def queryHeadOpt[R](render: => RenderedQuery[R]): Task[Option[R]] =
+  def queryHeadOpt[R](render: => RenderedQuery[R]) =
     query(render).map(_.headOption)
 
   def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T) =

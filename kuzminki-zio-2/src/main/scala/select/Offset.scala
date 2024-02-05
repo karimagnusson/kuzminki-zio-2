@@ -33,12 +33,14 @@ class Offset[M, R](model: M, coll: SelectCollector[R]) extends Limit(model, coll
 
   def asPages(size: Int) = Pages(render, size)
 
-  def stream = streamBatchBuffer(100, 3)
+  def stream = streamBatch(100)
 
-  def streamBatch(size: Int) = streamBatchBuffer(size, 3)
+  def streamBatch(size: Int) = {
+    val gen = new StreamQuery(asPages(size))
+    ZStream.unfoldChunkZIO(gen)(a => a.next)
+  }
 
   def streamBatchBuffer(batchSize: Int, bufferSize: Int) = {
-    val gen = new StreamQuery(asPages(batchSize))
-    ZStream.unfoldChunkZIO(gen)(a => a.next).buffer(bufferSize)
+    streamBatch(batchSize).buffer(bufferSize)
   }
 }

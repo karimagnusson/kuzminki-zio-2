@@ -17,7 +17,7 @@ homepage := Some(
   url("https://github.com/karimagnusson/kuzminki-zio-2")
 )
 
-ThisBuild / version := "0.9.5-RC1"
+ThisBuild / version := "0.9.5-RC2"
 ThisBuild / versionScheme := Some("early-semver")
 
 scalaVersion := "3.3.1"
