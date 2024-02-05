@@ -6,9 +6,9 @@
 
 The main goal of the latest version 0.9.5-RC2 is to provide support for Scala 3. It also has some import improvements and although it is a release candidate, it should be chosen over 0.9.4.
 
-See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
-
 This library is also available for ZIO 1 [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
+
+See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
 
 #### Sbt
 ```sbt
