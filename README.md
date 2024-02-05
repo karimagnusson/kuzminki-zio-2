@@ -10,7 +10,7 @@ See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
 
 #### Sbt
 ```sbt
-// available for Scala 2.13 and 3
+// available for Scala 2.13 and Scala 3
 libraryDependencies += "io.github.karimagnusson" %% "kuzminki-zio-2" % "0.9.5-RC2"
 ```
 
