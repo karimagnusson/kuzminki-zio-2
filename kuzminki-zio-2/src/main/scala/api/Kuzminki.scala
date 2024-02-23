@@ -65,15 +65,20 @@ trait Kuzminki {
 
   def query[R](render: => RenderedQuery[R]): Task[List[R]]
 
-  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): Task[List[T]]
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): Task[List[T]] =
+    query(render).map(_.map(transform))
 
-  def queryHead[R](render: => RenderedQuery[R]): Task[R]
+  def queryHead[R](render: => RenderedQuery[R]): Task[R] = 
+    query(render).map(_.headOption.getOrElse(throw NoRowsException("Query returned no rows")))
 
-  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): Task[T]
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): Task[T] =
+    queryHead(render).map(transform)
 
-  def queryHeadOpt[R](render: => RenderedQuery[R]): Task[Option[R]]
+  def queryHeadOpt[R](render: => RenderedQuery[R]): Task[Option[R]] =
+    query(render).map(_.headOption)
 
-  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): Task[Option[T]]
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): Task[Option[T]] =
+    query(render).map(_.headOption.map(transform))
 
   def exec(render: => RenderedOperation): Task[Unit]
 
@@ -108,21 +113,6 @@ private class DefaultApi(pool: Pool) extends Kuzminki {
     rows    <- pool.use(_.query(stm))
   } yield rows
 
-  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T) =
-    query(render).map(_.map(transform))
-
-  def queryHead[R](render: => RenderedQuery[R]) = 
-    query(render).map(_.headOption.getOrElse(throw NoRowsException("Query returned no rows")))
-
-  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T) =
-    queryHead(render).map(transform)
-
-  def queryHeadOpt[R](render: => RenderedQuery[R]) =
-    query(render).map(_.headOption)
-
-  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T) =
-    query(render).map(_.headOption.map(transform))
-
   def exec(render: => RenderedOperation) = for {
     stm     <- ZIO.attempt(render)
     _       <- pool.use(_.exec(stm))
@@ -150,21 +140,6 @@ private class SplitApi(getPool: Pool, setPool: Pool) extends Kuzminki {
     stm     <- ZIO.attempt(render)
     rows    <- router(stm.statement).use(_.query(stm))
   } yield rows
-
-  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T) =
-    query(render).map(_.map(transform))
-
-  def queryHead[R](render: => RenderedQuery[R]) = 
-    query(render).map(_.headOption.getOrElse(throw NoRowsException("Query returned no rows")))
-
-  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T) =
-    queryHead(render).map(transform)
-
-  def queryHeadOpt[R](render: => RenderedQuery[R]) =
-    query(render).map(_.headOption)
-
-  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T) =
-    query(render).map(_.headOption.map(transform))
 
   def exec(render: => RenderedOperation) = for {
     stm     <- ZIO.attempt(render)

@@ -26,6 +26,7 @@ trait ModelWrite {
 
   import org.tpolecat.typename.TypeName
 
+  @deprecated("this method will be removed", "0.9.5")
   inline def write[T](colArgs: TypeCol[_]*)(using p: ProductOf[T], cTag: ClassTag[T]) = {
     val cols = colArgs.toVector
     val names = TypeMembers.getTypes[T]
