@@ -168,33 +168,7 @@ package object api extends filters {
 }
 
 
-/*
-    def asTypeSink[T <: Product](
-      using mirror: ProductOf[T],
-            ev: P <:< mirror.MirroredElemTypes) = {
-      ZSink.foreach { (item: T) => 
-        db.exec(
-          query.render(
-            Tuple.fromProductTyped(item).asInstanceOf[P]
-          )
-        )
-      }
-    }
 
-    def asChunkTypeSink[T <: Product](
-      using mirror: ProductOf[T],
-            ev: P <:< mirror.MirroredElemTypes) = {
-      ZSink.foreach { (chunk: Chunk[T]) =>
-        db.execList(
-          chunk.toList.map { (item: T) =>
-            query.render(
-              Tuple.fromProductTyped(item).asInstanceOf[P]
-            )
-          }
-        )
-      }
-    }
-*/
 
 
 
