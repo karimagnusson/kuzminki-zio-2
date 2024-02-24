@@ -6,7 +6,7 @@
 
 Kuzminki is feature-rich query builder and access library for PostgreSQL written in Scala. It focuses on productivity by providing readable transparent syntax and making Postgres features available through the API.
 
-The main goal of the latest version 0.9.5-RC3 is to provide support for Scala 3. It also has some import improvements and although it is a release candidate, it should be chosen over 0.9.4. This latest version adds a method to return rows as types (see at the bottom).
+The main goal of the latest version 0.9.5-RC3 is to provide support for Scala 3. It also has some import improvements and although it is a release candidate, it should be chosen over 0.9.4. This latest version adds a method to return rows as types (see at the bottom). Please report bugs if you find them and feel free to DM me on Twitter if you have any questions.
 
 This library is also available for ZIO 1 [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
 
