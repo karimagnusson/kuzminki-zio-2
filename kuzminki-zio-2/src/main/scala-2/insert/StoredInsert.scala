@@ -16,9 +16,8 @@
 
 package kuzminki.insert
 
-import zio._
-import zio.stream.ZSink
-import kuzminki.api.db
+import java.sql.SQLException
+import kuzminki.api.{db, Kuzminki}
 import kuzminki.shape.{ParamConv, RowConv}
 import kuzminki.run.RunQueryParams
 import kuzminki.render.{
@@ -26,6 +25,8 @@ import kuzminki.render.{
   RenderedQuery,
   JoinArgs
 }
+import zio._
+import zio.stream.ZSink
 
 
 class StoredInsert[P](
@@ -39,32 +40,36 @@ class StoredInsert[P](
     joinArgs(args, paramConv.fromShape(params))
   )
 
-  def run(params: P) =
+  def run(params: P): ZIO[Kuzminki, SQLException, Unit] =
     db.exec(render(params))
 
-  def runNum(params: P) =
+  def runNum(params: P): ZIO[Kuzminki, SQLException, Int] =
     db.execNum(render(params))
 
-  def runList(paramList: Seq[P]) =
+  def runList(paramList: Seq[P]): ZIO[Kuzminki, SQLException, Unit] =
     db.execList(paramList.map(render(_)))
 
-  def asSink = ZSink.foreach((params: P) => db.exec(render(params)))
+  def collect(size: Int): ZSink[Any, Nothing, P, P, Chunk[P]] =
+    ZSink.collectAllN[P](size)
 
-  def collect(size: Int) = ZSink.collectAllN[P](size)
+  def asSink: ZSink[Kuzminki, SQLException, P, Nothing, Unit] =
+    ZSink.foreach((params: P) => db.exec(render(params)))
 
-  def asChunkSink = ZSink.foreach { (chunk: Chunk[P]) =>
-    db.execList(chunk.toList.map(p => render(p)))
+  def asChunkSink: ZSink[Kuzminki, SQLException, Chunk[P], Nothing, Unit] = {
+    ZSink.foreach { (chunk: Chunk[P]) =>
+      db.execList(chunk.toList.map(p => render(p)))
+    }
   }
 
-  def printSql = {
+  def printSql: StoredInsert[P] = {
     println(statement)
     this
   }
   
-  def printSqlAndArgs(params: P) =
+  def printSqlAndArgs(params: P): StoredInsert[P] =
     render(params).printStatementAndArgs(this)
   
-  def printSqlWithArgs(params: P) =
+  def printSqlWithArgs(params: P): StoredInsert[P] =
     render(params).printStatementWithArgs(this)
 }
 

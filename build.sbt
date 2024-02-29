@@ -17,7 +17,7 @@ homepage := Some(
   url("https://github.com/karimagnusson/kuzminki-zio-2")
 )
 
-ThisBuild / version := "0.9.5-RC3"
+ThisBuild / version := "0.9.5-RC4"
 ThisBuild / versionScheme := Some("early-semver")
 
 scalaVersion := "3.3.1"
@@ -65,7 +65,7 @@ lazy val zioPath = (project in file("kuzminki-zio-2"))
     ),
     Compile / scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((3, _))  => Seq("-rewrite")
+        case Some((3, _))  => Seq("-rewrite", "-Wunused:imports")
         case _             => Seq("-Xlint")
       }
     },

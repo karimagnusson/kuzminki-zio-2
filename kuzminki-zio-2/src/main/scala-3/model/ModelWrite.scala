@@ -16,7 +16,7 @@
 
 package kuzminki.model
 
-import scala.reflect.{classTag, ClassTag}
+import scala.reflect.ClassTag
 import scala.deriving.Mirror.ProductOf
 import kuzminki.column.TypeCol
 import kuzminki.shape._

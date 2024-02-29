@@ -19,11 +19,7 @@ package kuzminki
 import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
-import java.sql.SQLException
 import java.util.UUID
-
-import scala.deriving.Mirror.ProductOf
-import zio._
 
 import kuzminki.column._
 import kuzminki.filter._
@@ -31,8 +27,7 @@ import kuzminki.sorting.Sorting
 import kuzminki.assign.Assign
 import kuzminki.update.RenderUpdate
 import kuzminki.delete.RenderDelete
-import kuzminki.insert.{RenderInsert, Values, InsertOptions}
-import kuzminki.run._
+import kuzminki.insert.{RenderInsert, Values}
 import kuzminki.select._
 import kuzminki.render._
 
@@ -91,55 +86,6 @@ package object api extends filters {
   given kzFilterOptToSeq: Conversion[Option[Filter], Seq[Option[Filter]]] = (x: Option[Filter]) => Seq(x)
   given kzSortingToSeq: Conversion[Sorting, Seq[Sorting]] = (x: Sorting) => Seq(x)
   given kzAssignToSeq: Conversion[Assign, Seq[Assign]] = (x: Assign) => Seq(x)
-
-  // result type
-
-  extension [R <: Product](query: RunQuery[R]) {
-
-    def runType[T](
-      using mirror: ProductOf[T],
-            ev: R <:< mirror.MirroredElemTypes
-    ): ZIO[Kuzminki, SQLException, List[T]] = {
-      query.runAs(mirror.fromProduct(_))
-    }
-
-    def runHeadType[T](
-      using mirror: ProductOf[T],
-            ev: R <:< mirror.MirroredElemTypes
-    ): ZIO[Kuzminki, SQLException, T] = {
-      query.runHeadAs(mirror.fromProduct(_))
-    }
-
-    def runHeadOptType[T](
-      using mirror: ProductOf[T],
-            ev: R <:< mirror.MirroredElemTypes
-    ): ZIO[Kuzminki, SQLException, Option[T]] = {
-      query.runHeadOptAs(mirror.fromProduct(_))
-    }
-  }
-
-  extension [P, R <: Product](query: RunQueryParams[P, R]) {
-
-    def runType[T](params: P)(
-      using mirror: ProductOf[T],
-            ev: R <:< mirror.MirroredElemTypes
-    ): ZIO[Kuzminki, SQLException, List[T]] = {
-      query.runAs(params)(mirror.fromProduct(_))
-    }
-
-    def runHeadType[T](params: P)(
-      using mirror: ProductOf[T],
-            ev: R <:< mirror.MirroredElemTypes
-    ): ZIO[Kuzminki, SQLException, T] =
-      query.runHeadAs(params)(mirror.fromProduct(_))
-
-    def runHeadOptType[T](params: P)(
-      using mirror: ProductOf[T],
-            ev: R <:< mirror.MirroredElemTypes
-    ): ZIO[Kuzminki, SQLException, Option[T]] = {
-      query.runHeadOptAs(params)(mirror.fromProduct(_))
-    }
-  }
 
   // raw SQL
 

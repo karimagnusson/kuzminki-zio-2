@@ -17,9 +17,10 @@
 package kuzminki.select
 
 import java.sql.SQLException
-import zio.stream.ZStream
+import scala.deriving.Mirror.ProductOf
 import kuzminki.api.Kuzminki
 import kuzminki.section.OffsetSec
+import zio.stream.ZStream
 
 
 class Offset[M, R](model: M, coll: SelectCollector[R]) extends Limit(model, coll) {
@@ -40,6 +41,20 @@ class Offset[M, R](model: M, coll: SelectCollector[R]) extends Limit(model, coll
   def stream(size: Int): ZStream[Kuzminki, SQLException, R] = {
     val gen = new StreamQuery(asPages(size))
     ZStream.unfoldChunkZIO(gen)(a => a.next)
+  }
+
+  def streamType[T](
+    using mirror: ProductOf[T],
+          ev: R <:< mirror.MirroredElemTypes
+  ): ZStream[Kuzminki, SQLException, T] = {
+    stream.map((r: R) => mirror.fromProduct(r))
+  }
+
+  def streamType[T](size: Int)(
+    using mirror: ProductOf[T],
+          ev: R <:< mirror.MirroredElemTypes
+  ): ZStream[Kuzminki, SQLException, T] = {
+    stream(size).map((r: R) => mirror.fromProduct(r))
   }
 
   @deprecated("this method will be removed, Use 'stream(size = 200)'", "0.9.5")
