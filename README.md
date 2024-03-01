@@ -6,13 +6,15 @@
 
 Kuzminki is feature-rich query builder and access library for PostgreSQL written in Scala. It focuses on productivity by providing readable transparent syntax and making Postgres features available through the API.
 
-The main goal of the latest version 0.9.5-RC4 is to provide support for Scala 3. It also has some import improvements and although it is a release candidate, it should be chosen over 0.9.4. This latest version adds a method to return rows as types (see at the bottom). Please report bugs if you find them and feel free to DM me on Twitter if you have any questions.
+The main goal of the latest version 0.9.5-RC4 is to provide support for Scala 3. It also has some import improvements and although it is a release candidate, it should be chosen over 0.9.4. Please report bugs if you find them and feel free to DM me on Twitter if you have any questions.
 
 This library is also available for ZIO 1 [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
 
 Take a look at [kuzminki-zhttp-demo](https://github.com/karimagnusson/kuzminki-zhttp-demo) for an example of a REST API using this library and [zio-http](https://github.com/dream11/zio-http)  
 
 See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
+
+This latest version adds some methods to the API (see at the bottom).
 
 #### Sbt
 ```sbt
@@ -82,7 +84,7 @@ Statements can be cached for better performance and reusability. This means that
 Kuzminki supports only Postgresql. It could be adapted for use with other databases if there is interest in that. But given that it has support for many postgres specific features, support for another database would require it’s own project rather than a one size fits all approach. Therefore, at the moment the goal is to deliver a good library for Postgres. That being said, there are other Postgres compatible databases that work with Kuzminki. For example CockroachDB. For those looking to scale up, it might be a good choice.
 
 #### Version 0.9.5-RC4
-The latest version 0.9.5-RC4 adds a compiler checked method to return rows as types.
+The latest version adds compiler checked methods to use types.
 
 ```scala
 case class User(id: Int, name: String, age: Int)
@@ -117,6 +119,21 @@ sql
     t.lastName
   ))
   .runHeadType[User]
+
+// insert cache
+
+val stm = sql
+  .insert(user)
+  .cols2(t => (
+    t.name,
+    t.age
+  ))
+  .cache
+
+stm.runListType(List(
+  UserInfo("Bob", 25),
+  UserInfo("Jane", 23)
+))
 
 // streaming
 

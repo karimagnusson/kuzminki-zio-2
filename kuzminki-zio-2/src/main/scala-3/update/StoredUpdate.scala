@@ -19,7 +19,6 @@ package kuzminki.update
 import java.sql.SQLException
 import scala.deriving.Mirror.ProductOf
 import kuzminki.api.{db, Kuzminki}
-import kuzminki.api.db
 import kuzminki.shape.{ParamConv, RowConv}
 import kuzminki.render.{
   RenderedQuery,
