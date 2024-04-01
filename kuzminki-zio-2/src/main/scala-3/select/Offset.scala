@@ -56,12 +56,4 @@ class Offset[M, R](model: M, coll: SelectCollector[R]) extends Limit(model, coll
   ): ZStream[Kuzminki, SQLException, T] = {
     stream(size).map((r: R) => mirror.fromProduct(r))
   }
-
-  @deprecated("this method will be removed, Use 'stream(size = 200)'", "0.9.5")
-  def streamBatch(size: Int) = stream(size)
-
-  @deprecated("this method will be removed", "0.9.5")
-  def streamBatchBuffer(batchSize: Int, bufferSize: Int) = {
-    streamBatch(batchSize).buffer(bufferSize)
-  }
 }

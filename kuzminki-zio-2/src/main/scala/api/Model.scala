@@ -18,9 +18,7 @@ package kuzminki.api
 
 import scala.reflect.ClassTag
 import scala.annotation.tailrec
-
 import kuzminki.column.{ColInfo, TypeCol}
-import kuzminki.model.{ModelRead, ModelWrite}
 
 
 object Model {
@@ -68,7 +66,7 @@ object Model {
   }
 }
 
-abstract class Model(val __name: String) extends ModelRead with ModelWrite {
+abstract class Model(val __name: String) {
 
   def column[T](name: String)(implicit creator: ColInfo => TypeCol[T]) = {
     creator(ColInfo(name, __name))
